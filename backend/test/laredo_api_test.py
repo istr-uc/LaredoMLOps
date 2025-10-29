@@ -1,6 +1,6 @@
 import unittest
 from flask import json, jsonify
-from laredo_api import app
+from src.api.laredo_api import app
 
 class TestLaredoAPI(unittest.TestCase):
 

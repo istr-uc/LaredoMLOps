@@ -1,5 +1,5 @@
 import os
-from creation_types import *
+from src.utils.creation_types import *
 from preprocessing_strategy import *
 from model_strategies import *
 import pandas as pd
@@ -97,7 +97,8 @@ def train_model():
 
 @app.route("/models/<model_name>/deploy", methods=["POST"])
 def model_deploy(model_name):
-    templateLoader = jinja2.FileSystemLoader(searchpath="./")
+    # templateLoader = jinja2.FileSystemLoader(searchpath="./")
+    templateLoader = jinja2.FileSystemLoader(searchpath="src/resources/")
     templateEnv = jinja2.Environment(loader=templateLoader)
     TEMPLATE_FILE = "languageWrapper_template.jinja"
     template = templateEnv.get_template(TEMPLATE_FILE)

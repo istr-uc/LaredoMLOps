@@ -19,4 +19,5 @@ EXPOSE 5050
 #CMD [ "/project/laredo_env/bin/gunicorn --bind 0.0.0.0:5050 laredo_api:app" ]
 CMD ["/bin/bash"]
 
-ENTRYPOINT /project/laredo_env/bin/gunicorn -w 4 laredo_api:app -b 0.0.0.0:5050 -t 0
+# ENTRYPOINT /project/laredo_env/bin/gunicorn -w 4 laredo_api:app -b 0.0.0.0:5050 -t 0
+ENTRYPOINT source /project/laredo_env/bin/activate && export PYTHONPATH=/project && /project/laredo_env/bin/gunicorn -w 4 src.wsgi:app -t 0
