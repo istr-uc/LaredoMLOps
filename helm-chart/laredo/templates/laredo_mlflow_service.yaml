@@ -1,0 +1,15 @@
+{{- if  .Values.backend.deploy_mlflow }}
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: {{ .Values.backend.namespace}}
+  name: mlflow-service
+spec:
+  selector:
+    app: mlflow
+  ports:
+  - protocol: TCP
+    port: 5000
+    targetPort: 5000
+  type: ClusterIP
+{{- end }}

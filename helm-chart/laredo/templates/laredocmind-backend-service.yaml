@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.chatbotBackend.service.name }}
+  namespace: {{ .Values.chatbotBackend.namespace}}
+spec:
+  selector:
+    app: laredocmind-backend
+  ports:
+  - protocol: TCP
+    port: {{ .Values.chatbotBackend.service.port }}
+    targetPort: {{ .Values.chatbotBackend.service.port }}
+  type: {{ .Values.chatbotBackend.service.type}}

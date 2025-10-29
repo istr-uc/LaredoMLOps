@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: laredocmind-backend
+  namespace: {{ .Values.chatbotBackend.namespace}}
+  labels:
+    app: laredocmind-backend
+spec:
+  replicas: {{ .Values.chatbotBackend.replicaCount }}
+  selector:
+    matchLabels:
+      app: laredocmind-backend
+  template:
+    metadata:
+      labels:
+        app: laredocmind-backend
+    spec:
+      containers:
+      - name: laredocmind-backend
+        image: {{ .Values.chatbotBackend.image.repository }}:{{ .Values.chatbotBackend.image.tag }}
+        volumeMounts:
+        - name: laredocmind-secret
+          mountPath: /project/environment
+          readOnly: true
+        ports:
+        - containerPort: {{ .Values.chatbotBackend.service.port }}
+      volumes:
+        - name: laredocmind-secret
+          secret:
+            secretName: laredocmind-secret

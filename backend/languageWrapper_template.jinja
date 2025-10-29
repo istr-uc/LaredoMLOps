@@ -1,0 +1,39 @@
+apiVersion: machinelearning.seldon.io/v1
+kind: SeldonDeployment
+metadata:
+  name: laredo-server-{{ deployment_name }}
+spec:
+  name: worker
+  predictors:
+  - componentSpecs:
+    - spec:
+        containers:
+        - image: ghcr.io/dintenr/laredo-mlflow-model:0.0.1
+          name: classifier
+          env:
+          - name: SELDON_DEBUG
+            value: '1'
+        terminationGracePeriodSeconds: 1
+    graph:
+      children: []
+      endpoint:
+        type: REST
+      name: classifier
+      type: MODEL
+      parameters:
+        - name: tracking_uri_ip
+          type: STRING
+          value: '{{ tracking_uri_ip }}'
+        - name: model_name
+          type: STRING
+          value: '{{ model_name }}'
+        - name: tracking_uri_port
+          type: STRING
+          value: '{{ tracking_uri_port }}'
+        - name: is_k8s
+          type: BOOL
+          value: '{{ is_k8s }}'
+    labels:
+      version: v1
+    name: example
+    replicas: {{ replicas }}

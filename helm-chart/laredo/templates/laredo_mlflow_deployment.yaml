@@ -1,0 +1,22 @@
+{{- if  .Values.backend.deploy_mlflow }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: {{ .Values.backend.namespace}}
+  name: mlflow-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mlflow
+  template:
+    metadata:
+      labels:
+        app: mlflow
+    spec:
+      containers:
+      - name: mlflow
+        image: ghcr.io/dintenr/mlflow-istr:0.0.1
+        ports:
+        - containerPort: 5000
+{{- end }}

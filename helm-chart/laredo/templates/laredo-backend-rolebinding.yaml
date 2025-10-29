@@ -1,0 +1,13 @@
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: backend-rolebinding
+  namespace: laredo
+subjects:
+- kind: ServiceAccount
+  name: backend-account
+  apiGroup: ""
+roleRef:
+  kind: Role
+  name: laredo-backend-role
+  apiGroup: ""
