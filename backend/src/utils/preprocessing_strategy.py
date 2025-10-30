@@ -1,5 +1,5 @@
 from sklearn.compose import ColumnTransformer
-from preprocessing_transfomer import *
+from src.utils.preprocessing_transfomer import *
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import MinMaxScaler, Normalizer, StandardScaler, OneHotEncoder
 from sklearn.feature_selection import SelectKBest

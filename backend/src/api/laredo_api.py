@@ -1,7 +1,7 @@
 import os
 from src.utils.creation_types import *
-from preprocessing_strategy import *
-from model_strategies import *
+from src.utils.preprocessing_strategy import *
+from src.utils.model_strategies import *
 import pandas as pd
 from flask import Flask, jsonify, request, request
 from flask_restful import Api
@@ -10,7 +10,7 @@ import pandas as pd
 import jinja2
 from kubernetes import client, config
 import yaml
-from utils import ValidationError
+from src.utils.utils import ValidationError
 
 
 
