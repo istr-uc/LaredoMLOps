@@ -46,3 +46,9 @@ A more detailed description of the intallation process, including the installati
 This is the main Laredo repository and integrates all the previous developments. From now on, evolution and maintenance of Laredo will be managed and performed here.
 - Original UI repository: [Laredo User Interface](https://github.com/iBerrouet/TFGLaredo)
 - Original LaredocMind repository: [LaredocMind](https://github.com/Gabiz053/LaredocMind)
+
+By University of Cantabria.
+@author Isaac Berrouet Santos
+@author Gabriel Gómez García
+@author Ricardo Dintén
+@supervisor Marta Zorrilla
