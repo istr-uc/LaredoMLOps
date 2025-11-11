@@ -1,0 +1,42 @@
+// jsconfig.json - VS Code JavaScript project configuration
+// Enables path aliases, IntelliSense, and code navigation for React + Vite.
+{
+  "compilerOptions": {
+    // Base directory for resolving non-relative imports
+    "baseUrl": ".",
+    // Path alias: use '@/...' for imports from 'src/'
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    // Allow JavaScript files
+    "allowJs": true,
+    // Enable error checking in JS files
+    "checkJs": true,
+    // Use React 17+ JSX transform
+    "jsx": "react-jsx",
+    // Use modern ECMAScript modules
+    "module": "NodeNext",
+    // Node.js-style module resolution
+    "moduleResolution": "nodenext",
+    // Enable strict type-checking for better code quality
+    "strict": true,
+    // Enable source maps for easier debugging
+    "sourceMap": true,
+    // Target modern JavaScript (ESNext)
+    "target": "ESNext",
+    // Enable incremental compilation for faster builds
+    "incremental": true,
+    // Ensure consistent casing in imports across OSes
+    "forceConsistentCasingInFileNames": true,
+    // Allow importing .json files as modules
+    "resolveJsonModule": true,
+    // Ensure each file can be transpiled in isolation (recommended for Vite)
+    "isolatedModules": true,
+    // Allow importing TypeScript files with their extensions (future-proofing)
+    "allowImportingTsExtensions": true
+  },
+  // Include source files and main HTML
+  "include": ["src", "index.html"],
+  // Exclude dependencies and build output
+  "exclude": ["node_modules", "dist"]
+}

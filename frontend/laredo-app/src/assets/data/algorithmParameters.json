@@ -1,0 +1,502 @@
+{
+  "classifier" : {
+    "random_forest": {
+      "implementation": "sklearn",
+      "strategy" : "RandomForestClassifierSklearnStrategy",
+      "parameters": {
+        "n_estimators": {
+          "description": "Number of trees in the forest.",
+          "type": "integer",
+          "default": 100
+        },
+        "criterion": {
+          "description": "Function to measure the quality of a split.",
+          "type": "string",
+          "enum": ["gini", "entropy", "log_loss"],
+          "default": "gini"
+        },
+        "max_depth": {
+          "description": "Maximum depth of the tree.",
+          "type": ["integer", "null"],
+          "default": null
+        },
+        "min_samples_split": {
+          "description": "Minimum number of samples required to split an internal node.",
+          "type": ["integer", "float"],
+          "default": 2
+        },
+        "min_samples_leaf": {
+          "description": "Minimum number of samples required to be at a leaf node.",
+          "type": ["integer", "float"],
+          "default": 1
+        },
+        "min_weight_fraction_leaf": {
+          "description": "Minimum weighted fraction of the sum total of weights (of all the input samples) required to be at a leaf node.",
+          "type": "float",
+          "default": 0.0
+        },
+        "max_features": {
+          "description": "Number of features to consider when looking for the best split.",
+          "type": ["string", "integer", "null"],
+          "enum": ["sqrt", "log2", null],
+          "default": "sqrt"
+        },
+        "random_state": {
+          "description": "Seed of the random number generator.",
+          "type": ["integer", "null"],
+          "default": null
+        },
+        "max_leaf_nodes": {
+          "description": "Grow trees with max_leaf_nodes in best-first fashion.",
+          "type": ["integer", "null"],
+          "default": null
+        },
+        "min_impurity_decrease": {
+          "description": "A node will be split if this split induces a decrease of the impurity greater than or equal to this value.",
+          "type": "float",
+          "default": 0.0
+        },
+        "class_weight": {
+          "description": "Weights associated with classes.",
+          "type": ["null", "string", "object", "array"],
+          "enum": ["balanced", "balanced_subsample", null],
+          "default": null
+        },    
+        "ccp_alpha": {
+          "description": "Complexity parameter used for Minimal Cost-Complexity Pruning.",
+          "type": "float",
+          "minimum": 0,
+          "default": 0.0
+        },
+        "bootstrap": {
+          "description": "Whether bootstrap samples are used when building trees.",
+          "type": "boolean",
+          "default": true
+        },
+        "oob_score": {
+          "description": "Whether to use out-of-bag samples to estimate the generalization score.",
+          "type": "boolean",
+          "default": false
+        },
+        "n_jobs": {
+          "description": "Number of jobs to run in parallel for both fit and predict.",
+          "type": ["integer", "null"],
+          "default": null
+        },
+        "verbose": {
+          "description": "Controls the verbosity when fitting and predicting.",
+          "type": "integer",
+          "default": 0
+        },
+        "warm_start": {
+          "description": "When set to True, reuse the solution of the previous call to fit and add more estimators to the ensemble.",
+          "type": "boolean",
+          "default": false
+        },
+        "max_samples": {
+          "description": "The number of samples to draw from X to train each base estimator.",
+          "type": ["integer", "float", "null"],
+          "default": null
+        }
+      }
+    },
+    "decision_tree": {
+      "implementation": "sklearn",
+      "strategy" : "DecisionTreeClassifierSklearnStrategy",
+      "parameters": {
+        "criterion": {
+          "description": "Function to measure the quality of a split.",
+          "type": "string",
+          "enum": ["gini", "entropy", "log_loss"],
+          "default": "gini"
+        },
+        "splitter": {
+          "description": "The strategy used to choose the split at each node.",
+          "type": "string",
+          "enum": ["best", "random"],
+          "default": "best"
+        },
+        "max_depth": {
+          "description": "Maximum depth of the tree.",
+          "type": ["integer", "null"],
+          "default": null
+        },
+        "min_samples_split": {
+          "description": "Minimum number of samples required to split an internal node.",
+          "type": ["integer", "float"],
+          "default": 2
+        },
+        "min_samples_leaf": {
+          "description": "Minimum number of samples required to be at a leaf node.",
+          "type": ["integer", "float"],
+          "default": 1
+        },
+        "min_weight_fraction_leaf": {
+          "description": "Minimum weighted fraction of the sum total of weights (of all the input samples) required to be at a leaf node.",
+          "type": "float",
+          "default": 0.0
+        },
+        "max_features": {
+          "description": "Number of features to consider when looking for the best split.",
+          "type": ["integer", "float", "string", "null"],
+          "enum": ["auto", "sqrt", "log2", null],
+          "default": null
+        },
+        "random_state": {
+          "description": "Seed of the random number generator.",
+          "type": ["integer", "null"],
+          "default": null
+        },
+        "max_leaf_nodes": {
+          "description": "Grow trees with max_leaf_nodes in best-first fashion.",
+          "type": ["integer", "null"],
+          "default": null
+        },
+        "min_impurity_decrease": {
+          "description": "A node will be split if this split induces a decrease of the impurity greater than or equal to this value.",
+          "type": "float",
+          "default": 0.0
+        },
+        "class_weight": {
+          "description": "Weights associated with classes in the form {class_label: weight}.",
+          "type": ["null", "string", "object", "array"],
+          "enum": ["balanced"],
+          "default": null
+        },
+        "ccp_alpha": {
+          "description": "Complexity parameter used for Minimal Cost-Complexity Pruning.",
+          "type": "float",
+          "minimum": 0,
+          "default": 0.0
+        }
+      }
+    },
+    "support_vector_machine": {
+      "implementation": "sklearn",
+      "strategy" : "SupportVectorMachineClassifierSklearnStrategy",
+      "parameters": {
+        "C": {
+          "description": "Regularization parameter.",
+          "type": "float",
+          "default": 1.0
+        },
+        "kernel": {
+          "description": "Specifies the kernel type to be used in the algorithm.",
+          "type": "string",
+          "enum": ["linear", "poly", "rbf", "sigmoid", "precomputed"],
+          "default": "rbf"
+        },
+        "degree": {
+          "description": "Degree of the polynomial kernel function.",
+          "type": "integer",
+          "default": 3
+        },
+        "gamma": {
+          "description": "Kernel coefficient for 'rbf', 'poly', and 'sigmoid'.",
+          "type": ["string", "float"],
+          "enum": ["scale", "auto"],
+          "default": "scale"
+        },
+        "coef0": {
+          "description": "Independent term in kernel function.",
+          "type": "float",
+          "default": 0.0
+        },
+        "shrinking": {
+          "description": "Whether to use the shrinking heuristic.",
+          "type": "boolean",
+          "default": true
+        },
+        "probability": {
+          "description": "Whether to enable probability estimates.",
+          "type": "boolean",
+          "default": false
+        },
+        "tol": {
+          "description": "Tolerance for stopping criterion.",
+          "type": "float",
+          "default": 1e-3
+        },
+        "cache_size": {
+          "description": "Size of the kernel cache.",
+          "type": "float",
+          "default": 200
+        },
+        "class_weight": {
+          "description": "Weights associated with classes in the form {class_label: weight}.",
+          "type": ["null", "object", "string"],
+          "enum": ["balanced", null],
+          "default": null
+        },
+        "verbose": {
+          "description": "Enable verbose output.",
+          "type": "boolean",
+          "default": false
+        },
+        "max_iter": {
+          "description": "Hard limit on iterations within solver.",
+          "type": "integer",
+          "default": -1
+        },
+        "decision_function_shape": {
+          "description": "Whether to return one-vs-rest ('ovr') or one-vs-one ('ovo') decision function.",
+          "type": "string",
+          "enum": ["ovo", "ovr"],
+          "default": "ovr"
+        },
+        "break_ties": {
+          "description": "Whether to break ties in decision_function output.",
+          "type": "boolean",
+          "default": false
+        },
+        "random_state": {
+          "description": "Seed of the random number generator.",
+          "type": ["integer", "null"],
+          "default": null
+        }
+      }
+    },
+    "k-nearest_neighbors" : {
+      "implementation" : "sklearn",
+      "strategy" : "KNeighborsClassifierSklearnStrategy",
+      "parameters" : {
+        "n_neighbors": {
+          "description": "Number of neighbors to use.",
+          "type": "integer",
+          "default": 3
+        }
+      }
+    }
+  },
+  "regressor" : {
+    "random_forest": {
+      "implementation": "sklearn",
+      "strategy" : "RandomForestRegressorSklearnStrategy",
+      "parameters": {
+        "n_estimators": {
+          "description": "Number of trees in the forest.",
+          "type": "integer",
+          "default": 100
+        },
+        "criterion": {
+          "description": "Function to measure the quality of a split.",
+          "type": "string",
+          "enum": ["squared_error", "absolute_error", "friedman_mse", "poisson"],
+          "default": "squared_error"
+        },
+        "max_depth": {
+          "description": "Maximum depth of the tree.",
+          "type": ["integer", "null"],
+          "default": null
+        },
+        "min_samples_split": {
+          "description": "Minimum number of samples required to split an internal node.",
+          "type": ["integer", "float"],
+          "default": 2
+        },
+        "min_samples_leaf": {
+          "description": "Minimum number of samples required to be at a leaf node.",
+          "type": ["integer", "float"],
+          "default": 1
+        },
+        "min_weight_fraction_leaf": {
+          "description": "Minimum weighted fraction of the sum total of weights (of all the input samples) required to be at a leaf node.",
+          "type": "float",
+          "default": 0.0
+        },
+        "max_features": {
+          "description": "Number of features to consider when looking for the best split.",
+          "type": ["string", "integer", "float", "null"],
+          "enum": ["sqrt", "log2", null],
+          "default": 1.0
+        },
+        "random_state": {
+          "description": "Seed of the random number generator.",
+          "type": ["integer", "null"],
+          "default": null
+        },
+        "max_leaf_nodes": {
+          "description": "Grow trees with max_leaf_nodes in best-first fashion.",
+          "type": ["integer", "null"],
+          "default": null
+        },
+        "min_impurity_decrease": {
+          "description": "A node will be split if this split induces a decrease of the impurity greater than or equal to this value.",
+          "type": "float",
+          "default": 0.0
+        },  
+        "ccp_alpha": {
+          "description": "Complexity parameter used for Minimal Cost-Complexity Pruning.",
+          "type": "float",
+          "minimum": 0,
+          "default": 0.0
+        },
+        "bootstrap": {
+          "description": "Whether bootstrap samples are used when building trees.",
+          "type": "boolean",
+          "default": true
+        },
+        "oob_score": {
+          "description": "Whether to use out-of-bag samples to estimate the generalization score.",
+          "type": "boolean",
+          "default": false
+        },
+        "n_jobs": {
+          "description": "Number of jobs to run in parallel for both fit and predict.",
+          "type": ["integer", "null"],
+          "default": null
+        },
+        "verbose": {
+          "description": "Controls the verbosity when fitting and predicting.",
+          "type": "integer",
+          "default": 0
+        },
+        "warm_start": {
+          "description": "When set to True, reuse the solution of the previous call to fit and add more estimators to the ensemble.",
+          "type": "boolean",
+          "default": false
+        },
+        "max_samples": {
+          "description": "The number of samples to draw from X to train each base estimator.",
+          "type": ["integer", "float", "null"],
+          "default": null
+        }
+      }
+    },
+    "decision_tree": {
+      "implementation": "sklearn",
+      "strategy" : "DecisionTreeRegressorSklearnStrategy",
+      "parameters": {
+        "criterion": {
+          "description": "Function to measure the quality of a split.",
+          "type": "string",
+          "enum": ["squared_error", "absolute_error", "friedman_mse", "poisson"],
+          "default": "squared_error"
+        },
+        "splitter": {
+          "description": "The strategy used to choose the split at each node.",
+          "type": "string",
+          "enum": ["best", "random"],
+          "default": "best"
+        },
+        "max_depth": {
+          "description": "Maximum depth of the tree.",
+          "type": ["integer", "null"],
+          "default": null
+        },
+        "min_samples_split": {
+          "description": "Minimum number of samples required to split an internal node.",
+          "type": ["integer", "float"],
+          "default": 2
+        },
+        "min_samples_leaf": {
+          "description": "Minimum number of samples required to be at a leaf node.",
+          "type": ["integer", "float"],
+          "default": 1
+        },
+        "min_weight_fraction_leaf": {
+          "description": "Minimum weighted fraction of the sum total of weights (of all the input samples) required to be at a leaf node.",
+          "type": "float",
+          "default": 0.0
+        },
+        "max_features": {
+          "description": "Number of features to consider when looking for the best split.",
+          "type": ["integer", "float", "string", "null"],
+          "enum": ["auto", "sqrt", "log2", null],
+          "default": null
+        },
+        "random_state": {
+          "description": "Seed of the random number generator.",
+          "type": ["integer", "null"],
+          "default": null
+        },
+        "max_leaf_nodes": {
+          "description": "Grow trees with max_leaf_nodes in best-first fashion.",
+          "type": ["integer", "null"],
+          "default": null
+        },
+        "min_impurity_decrease": {
+          "description": "A node will be split if this split induces a decrease of the impurity greater than or equal to this value.",
+          "type": "float",
+          "default": 0.0
+        },
+        "ccp_alpha": {
+          "description": "Complexity parameter used for Minimal Cost-Complexity Pruning.",
+          "type": "float",
+          "minimum": 0,
+          "default": 0.0
+        }
+      }
+    },
+    "support_vector_regression": {
+      "implementation": "sklearn",
+      "strategy" : "SupportVectorRegressionSklearnStrategy",
+      "parameters": {
+        "C": {
+          "description": "Regularization parameter.",
+          "type": "float",
+          "default": 1.0
+        },
+        "kernel": {
+          "description": "Specifies the kernel type to be used in the algorithm.",
+          "type": "string",
+          "enum": ["linear", "poly", "rbf", "sigmoid", "precomputed"],
+          "default": "rbf"
+        },
+        "degree": {
+          "description": "Degree of the polynomial kernel function.",
+          "type": "integer",
+          "default": 3
+        },
+        "gamma": {
+          "description": "Kernel coefficient for 'rbf', 'poly', and 'sigmoid'.",
+          "type": ["string", "float"],
+          "enum": ["scale", "auto"],
+          "default": "scale"
+        },
+        "coef0": {
+          "description": "Independent term in kernel function.",
+          "type": "float",
+          "default": 0.0
+        },
+        "shrinking": {
+          "description": "Whether to use the shrinking heuristic.",
+          "type": "boolean",
+          "default": true
+        },
+        "tol": {
+          "description": "Tolerance for stopping criterion.",
+          "type": "float",
+          "default": 1e-3
+        },
+        "cache_size": {
+          "description": "Size of the kernel cache.",
+          "type": "float",
+          "default": 200
+        },
+        "verbose": {
+          "description": "Enable verbose output.",
+          "type": "boolean",
+          "default": false
+        },
+        "max_iter": {
+          "description": "Hard limit on iterations within solver.",
+          "type": "integer",
+          "default": -1
+        }
+      }
+    },
+    "k-nearest_neighbors" : {
+      "implementation" : "sklearn",
+      "strategy" : "KNeighborsRegressorSklearnStrategy",
+      "parameters" : {
+        "n_neighbors": {
+          "description": "Number of neighbors to use.",
+          "type": "integer",
+          "default": 3
+        }
+      }
+    }
+  }
+}
+  

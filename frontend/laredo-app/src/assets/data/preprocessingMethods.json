@@ -1,0 +1,79 @@
+{
+  "Scale_and_Encode_Features": {
+    "multiple_selection": true,
+    "methods": {
+      "minmax_scaler": {
+        "strategy": "MinMaxScalerStrategy",
+        "params": {
+          "min": {
+            "type": "integer",
+            "description": "Minimum value for scaling"
+          },
+          "max": {
+            "type": "integer",
+            "description": "Maximum value for scaling"
+          }
+        },
+        "url": "https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.MinMaxScaler.html"
+      },
+      "target_encoder": {
+        "strategy": "TargetEncoderStrategy",
+        "url": "https://contrib.scikit-learn.org/category_encoders/targetencoder.html"
+      },
+      "normalizer": {
+        "strategy": "NormalizerStrategy",
+        "url": "https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.Normalizer.html"
+      },
+      "standard_scaler": {
+        "strategy": "StandardScalerStrategy",
+        "url": "https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.StandardScaler.html"
+      },
+      "one_hot_encoder": {
+        "strategy": "OneHotEncoderStrategy",
+        "url": "https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.OneHotEncoder.html"
+      }
+    }
+  },
+  "Reduce_Columns": {
+    "multiple_selection": false,
+    "methods": {
+      "selectkbest": {
+        "strategy": "SelectKBestStrategy",
+        "params": {
+          "k": {
+            "type": "integer",
+            "description": "Number of top features to select"
+          }
+        },
+        "url": "https://scikit-learn.org/stable/modules/generated/sklearn.feature_selection.SelectKBest.html"
+      },
+      "pca": {
+        "strategy": "PCAStrategy",
+        "params": {
+          "n_components": {
+            "type": "integer",
+            "description": "Number of components to keep"
+          }
+        },
+        "url": "https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html"
+      }
+    }
+  },
+  "Fill_Empty_Rows": {
+    "multiple_selection": true,
+    "methods": {
+      "SimpleImputer": {
+        "strategy": "SimpleImputerStrategy",
+        "url": "https://scikit-learn.org/stable/modules/generated/sklearn.impute.SimpleImputer.html"
+      },
+      "Ffill": {
+        "strategy": "FfillStrategy",
+        "url": "https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.ffill.html"
+      },
+      "Bfill": {
+        "strategy": "BfillStrategy",
+        "url": "https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.bfill.html"
+      }
+    }
+  }
+}

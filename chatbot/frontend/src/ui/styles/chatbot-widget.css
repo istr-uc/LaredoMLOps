@@ -1,0 +1,262 @@
+@import "tailwindcss";
+
+@theme {
+    /* === Colors === */
+    --color-dark-gray: rgb(30 32 40);
+    --color-gray: rgb(56 61 68);
+    --color-light-blue: rgb(191 219 254);
+    --color-chat-white: rgb(230 233 240);
+    --color-error-red: rgb(208 69 82);
+
+    /* === Base Shadows === */
+    --shadow-base: 4px 12px 20px rgba(0, 0, 0, 0.3);
+    --shadow-pulse-1: 0 0 20px 5px rgba(191, 219, 254, 0.3);
+    --shadow-pulse-2: 0 0 25px 10px rgba(191, 219, 254, 0.4);
+    --shadow-none-1: 0 0 0 0 rgba(191, 219, 254, 0);
+    --shadow-none-2: 0 0 0 0 rgba(191, 219, 254, 0);
+
+    /* === Animations === */
+    --animate-chatbot-pulse-shadow: chatbotPulseShadow 4s infinite;
+    --animate-chatbot-pulse-shadow-btn: chatbotPulseShadow 2s infinite;
+
+    --animate-chatbot-spinner: chatbotSpinner 1.5s linear infinite;
+    --animate-chatbot-spinner-delayed: chatbotSpinner 1.5s linear infinite 0.75s;
+
+    --animate-chatbot-panel-expand: chatbotPanelExpand 0.3s cubic-bezier(0.25, 0.1, 0.25, 1.0);
+    --animate-chatbot-panel-contract: chatbotPanelContract 0.3s cubic-bezier(0.25, 0.1, 0.25, 1.0);
+
+    --animate-chatbot-button-expand: chatbotButtonExpand 0.3s cubic-bezier(0.25, 0.1, 0.25, 1.0);
+    --animate-chatbot-button-contract: chatbotButtonContract 0.3s cubic-bezier(0.25, 0.1, 0.25, 1.0);
+
+    --animate-assistant-message: assistantMessage 2s cubic-bezier(0.25, 0.1, 0.25, 1.0);
+    --animate-brand-name-letter: brandNameLetter 1s cubic-bezier(0.25, 0.1, 0.25, 1.0) both;
+
+    /* === Keyframes === */
+    @keyframes chatbotPulseShadow {
+        0% {
+            box-shadow: var(--shadow-base), var(--shadow-none-1), var(--shadow-none-2);
+        }
+
+        30%,
+        60% {
+            box-shadow: var(--shadow-base), var(--shadow-pulse-1), var(--shadow-pulse-2);
+        }
+
+        100% {
+            box-shadow: var(--shadow-base), var(--shadow-none-1), var(--shadow-none-2);
+        }
+    }
+
+    @keyframes chatbotSpinner {
+        0% {
+            transform: scale(0);
+            opacity: 1;
+            box-shadow: var(--shadow-base), var(--shadow-pulse-1), var(--shadow-pulse-2);
+        }
+
+        100% {
+            transform: scale(1);
+            opacity: 0;
+            box-shadow: var(--shadow-base), var(--shadow-none-1), var(--shadow-none-2);
+        }
+    }
+
+    @keyframes chatbotPanelExpand {
+        0% {
+            transform: scale(0);
+            transform-origin: bottom right;
+        }
+
+        50% {
+            transform: scale(1.01) translate(-10px, -10px);
+            transform-origin: bottom right;
+        }
+
+        75% {
+            transform: scale(0.99) translate(-5px, -5px);
+            transform-origin: bottom right;
+        }
+
+        100% {
+            transform: scale(1) translate(0px, 0px);
+            transform-origin: bottom right;
+        }
+    }
+
+    @keyframes chatbotPanelContract {
+        0% {
+            transform: scale(1);
+            transform-origin: bottom right;
+        }
+
+        100% {
+            transform: scale(0);
+            transform-origin: bottom right;
+        }
+    }
+
+    @keyframes chatbotButtonExpand {
+        0% {
+            transform: scale(1);
+            transform-origin: bottom right;
+        }
+
+        100% {
+            transform: scale(1.2);
+            transform-origin: bottom right;
+        }
+    }
+
+    @keyframes chatbotButtonContract {
+        0% {
+            transform: scale(1.2);
+            transform-origin: bottom right;
+        }
+
+        30% {
+            transform: scale(0.99) translate(8px, 8px);
+            transform-origin: bottom right;
+        }
+
+        60% {
+            transform: scale(1.1) translate(4px, 4px);
+            transform-origin: bottom right;
+        }
+
+        80% {
+            transform: scale(1.05) translate(0px, 0px);
+            transform-origin: bottom right;
+        }
+
+        100% {
+            transform: scale(1);
+            transform-origin: bottom right;
+        }
+    }
+
+    @keyframes assistantMessage {
+        0% {
+            opacity: 0;
+            transform: scale(1.2);
+            filter: blur(6px);
+        }
+
+        100% {
+            opacity: 1;
+            transform: scale(1);
+            filter: blur(0);
+        }
+    }
+
+    @keyframes brandNameLetter {
+        0% {
+            text-shadow: none;
+        }
+
+        100% {
+            text-shadow:
+                0 0 20px rgba(191, 219, 254, 0.4),
+                0 0 25px rgba(191, 219, 254, 0.5);
+        }
+    }
+}
+
+@layer components {
+
+    /* Spinner Styles */
+    .spinner-child {
+        @apply absolute h-full w-full rounded-full bg-blue-200 opacity-0;
+    }
+
+    /*
+     * Markdown Styles for Chat Bubbles
+     * --------------------------------
+     * These rules ensure markdown content is readable, well-spaced, and visually consistent in the chat UI.
+     */
+
+    /* Main container for markdown content in chat bubbles */
+    .markdown-container {
+        @apply mb-5;
+    }
+
+    /* Remove bottom margin from the last child to avoid extra space */
+    .markdown-container> :last-child {
+        @apply mb-0;
+    }
+
+    /* Paragraphs inside markdown: spaced for readability */
+    .markdown-container p {
+        @apply mb-5;
+    }
+
+    /* Headings (h1-h6): bold and spaced */
+    .markdown-container h1,
+    .markdown-container h2,
+    .markdown-container h3,
+    .markdown-container h4,
+    .markdown-container h5,
+    .markdown-container h6 {
+        @apply font-bold mb-5;
+    }
+
+    /* Lists: indented and spaced */
+    .markdown-container ol,
+    .markdown-container ul {
+        @apply mx-0 mt-0 mb-5 pl-8;
+    }
+
+    /* Ordered lists: decimal numbers */
+    .markdown-container ol {
+        @apply list-decimal;
+    }
+
+    /* Unordered lists: bullet points */
+    .markdown-container ul {
+        @apply list-disc;
+    }
+
+    /* List items: spaced apart */
+    .markdown-container li {
+        @apply mb-3;
+    }
+
+    /* Last list item: no extra margin */
+    .markdown-container li:last-child {
+        @apply mb-0;
+    }
+
+    /*
+     * Code blocks and inline code:
+     * - pre-wrap: allow long lines to wrap
+     * - break-word: break long words if needed
+     * - overflow-x: auto for horizontal scroll if still too long
+     */
+    .markdown-container pre,
+    .markdown-container code {
+        white-space: pre-wrap;
+        word-break: break-word;
+        overflow-x: auto;
+    }
+
+    /* Custom Scrollbar (solo para el widget) */
+    .chatbot-widget ::-webkit-scrollbar {
+        @apply h-4 w-2;
+    }
+
+    .chatbot-widget ::-webkit-scrollbar-track {
+        @apply bg-transparent rounded-3xl;
+    }
+
+    .chatbot-widget ::-webkit-scrollbar-thumb {
+        @apply bg-light-blue/30 rounded-3xl;
+    }
+
+    .chatbot-pin-btn {
+        border-width: 0px !important;
+        border-style: solid !important;
+    }
+    .chatbot-pin-btn.pinned {
+        border-width: 2px !important;
+        border-color: rgb(191 219 254) !important;
+    }
+}

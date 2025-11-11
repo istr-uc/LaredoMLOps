@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: laredo-backend
+  namespace: {{ .Values.backend.namespace}}
+  labels:
+    app: laredo-backend
+spec:
+  serviceAccountName: backend-account
+  replicas: {{ .Values.backend.replicaCount }}
+  selector:
+    matchLabels:
+      app: laredo-backend
+  template:
+    metadata:
+      labels:
+        app: laredo-backend
+    spec:
+      serviceAccountName: backend-account
+      containers:
+      - name: laredo-backend
+        image: {{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag }}
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: TRACKING_URI_IP
+          value: {{ quote .Values.backend.mlflow_tracking_uri_ip }}
+        - name: TRACKING_URI_PORT
+          value: {{ quote .Values.backend.mlflow_tracking_uri_port }}
+        ports:
+        - containerPort: {{ .Values.backend.service.port }}

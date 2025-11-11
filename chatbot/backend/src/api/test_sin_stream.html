@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Chatbot Test</title>
+</head>
+
+<body>
+    <h1>Chatbot Test</h1>
+    <textarea id="output" rows="10" cols="80" readonly></textarea><br>
+    <input id="question" placeholder="Type a question" size="60">
+    <button onclick="sendQuestion()">Send</button>
+
+    <script>
+        // This function is called when the user clicks the "Send" button
+        function sendQuestion() {
+            // Get the question entered by the user
+            const question = document.getElementById("question").value;
+
+            // Get the textarea element to display the response
+            const output = document.getElementById("output");
+
+            // Clear the output before sending the new question
+            output.value = "";
+
+            // Send the question to the backend using the Fetch API
+            fetch("http://localhost:20000/chatbot", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ question }) // Send the question as a JSON payload
+            })
+            .then(response => response.json()) // Parse the response as JSON
+            .then(data => {
+                console.log(data); // Log the response to check its structure
+                if (data.answer) {
+                    // If the response has an "answer" field, display it
+                    output.value = data.answer;
+                } else {
+                    // If no "answer" field, show an error message
+                    output.value = "No answer received from the server.";
+                }
+            })
+            .catch(error => {
+                // Handle any errors
+                console.error(error); // Log the error
+                output.value = "Error: " + error;
+            });
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: laredo-frontend
+  namespace: {{ .Values.frontend.namespace}}
+  labels:
+    app: laredo-frontend
+spec:
+  replicas: {{ .Values.frontend.replicaCount }}
+  selector:
+    matchLabels:
+      app: laredo-frontend
+  template:
+    metadata:
+      labels:
+        app: laredo-frontend
+    spec:
+      containers:
+      - name: laredo-frontend
+        image: {{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag }}
+        ports:
+        - containerPort: {{ .Values.frontend.service.port }}
+        env:
+        - name: BACKEND_HOST
+          value: {{ .Values.backend.service.name }}.{{ .Values.backend.namespace }}.svc.cluster.local:{{ .Values.backend.service.port }}
+        - name: CHATBOT_HOST
+          value: {{ .Values.chatbotBackend.service.name }}.{{ .Values.chatbotBackend.namespace }}.svc.cluster.local:{{ .Values.chatbotBackend.service.port }}

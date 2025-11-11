@@ -1,0 +1,11 @@
+@import "tailwindcss";
+
+@layer base {
+  html {
+    @apply bg-slate-950;
+    @apply text-cyan-400;
+  }
+  h1 {
+    @apply text-white;
+  }
+}
