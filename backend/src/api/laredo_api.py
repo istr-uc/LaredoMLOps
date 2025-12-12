@@ -193,14 +193,17 @@ def get_deployments():
 
     v1 = client.CustomObjectsApi()
 
-    deployments = v1.list_namespaced_custom_object(
-        group="machinelearning.seldon.io",
-        version="v1",
-        plural="seldondeployments",
-        namespace="laredo")
+    # If not found, raises catch the exception and return an empty list
+    try:
+        deployments = v1.list_namespaced_custom_object(
+            group="machinelearning.seldon.io",
+            version="v1",
+            plural="seldondeployments",
+            namespace="laredo")
+        deployments = deployments["items"]
+    except client.exceptions.ApiException as e:
+        deployments = []
 
-
-    deployments = deployments["items"]
     #print("deployments: ", len(deployments))
     return deployments
 

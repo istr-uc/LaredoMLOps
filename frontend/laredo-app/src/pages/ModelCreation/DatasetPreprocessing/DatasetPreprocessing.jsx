@@ -8,15 +8,24 @@ import { validateAndParseParam } from '@utils/paramsUtils'
 import DropColumnsSelection from '@pages/ModelCreation/DatasetPreprocessing/DropColumnsSelection'
 
 function DatasetPreprocessing({columns, dropColumns, setDropColumns, selectedMethods, setSelectedMethods, 
-    columnsDropSelected, setColumnsDropSelected, onNextStep}) {
-
+    columnsDropSelected, setColumnsDropSelected, target, usableColumns, setUsableColumns, onNextStep}) {
+    
     const [showModal, setShowModal] = useState(false)
     const [selectedCategory, setSelectedCategory] = useState('')
     const [selectedMethod, setSelectedMethod] = useState('')
     const [selectedParams, setSelectedParams] = useState({})
     const [errors, setErrors] = useState({})
+    
+    
 
     const openModal = () => {
+        // if usable columns are empty or have changed, update them
+        
+        if (usableColumns.length === 0) {
+            setUsableColumns(columns.filter(col => !(dropColumns.includes(col) || col === target)))
+        } else if (usableColumns.length !== columns.filter(col => !(dropColumns.includes(col) || col === target)).length) {
+            setUsableColumns(columns.filter(col => !(dropColumns.includes(col) || col === target)))
+        }
         setShowModal(true)
     }
 
@@ -65,6 +74,10 @@ function DatasetPreprocessing({columns, dropColumns, setDropColumns, selectedMet
 
         Object.entries(selectedParams).forEach(([paramName, value]) => {
             const param = methodParams[paramName]
+            // If the parameter type is 'column', set its enum to the list of columns
+            if (param.type === 'column') {
+                param.enum = usableColumns
+            }
             const { isValidParameter, parsedValue } = validateAndParseParam(paramName, value, param.type, param.enum)
             if (!isValidParameter) {
                 setErrors(prevErrors => ({
@@ -178,12 +191,27 @@ function DatasetPreprocessing({columns, dropColumns, setDropColumns, selectedMet
                         <label htmlFor={paramName} className='text-2xl mb-1'>
                             {paramName}
                         </label>
+                        
+                        { // If the parameter type is 'column', render a dropdown with the column names 
+                        preprocessingMethods[selectedCategory].methods[selectedMethod].params[paramName].type === 'column' ?
+                        <select
+                            id={paramName}
+                            className='text-xl border border-white bg-gray-800 rounded-md p-2'
+                            onChange={(e) => handleChange(paramName, e.target.value)}
+                        >
+                            <option value=''>Select an option</option>
+                            {usableColumns.map((option) => (
+                                <option key={option} value={option}>{option}</option>
+                            ))}
+                        </select>
+                        : // Otherwise, render a text input
                         <input
                             type='text'
                             id={paramName}
                             className='text-xl border border-white bg-gray-800 rounded-md p-2'
                             onChange={(e) => handleChange(paramName, e.target.value)}
                         />
+                        }
                         <strong className='text-red-500'>{errors[paramName]}</strong>
                     </div>
                 ))}
