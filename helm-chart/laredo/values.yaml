@@ -135,6 +135,12 @@ chatbotBackend:
     LANGSMITH_API_KEY: "your-langsmith-api-key"
     LANGSMITH_TRACING_V2: "true"
     LANGSMITH_PROJECT: "chatbot"
+    
+  llm_models:
+    MAIN_LLM_MODEL: "gemma-3-27b-it"
+    
+    LLM_TRANSLATION_SUMMARIZATION_MODEL: "gemma-3-27b-it"
+    
 
 ingress:
   enabled: false

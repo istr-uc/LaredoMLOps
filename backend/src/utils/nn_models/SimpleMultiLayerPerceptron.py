@@ -5,7 +5,13 @@ class SimpleMultiLayerPerceptronClassifier(torch.nn.Module):
         super(SimpleMultiLayerPerceptronClassifier, self).__init__()
         layers = []
         in_size = input_size
-        
+        self.params = {
+            "input_size": input_size,
+            "hidden_sizes": hidden_sizes,
+            "output_size": output_size,
+            "activation_fn": activation_fn,
+            **kwargs
+        }
         for hidden_size in hidden_sizes:
             layers.append(torch.nn.Linear(in_size, hidden_size))
             layers.append(activation_fn())
@@ -25,13 +31,22 @@ class SimpleMultiLayerPerceptronClassifier(torch.nn.Module):
         
     def forward(self, x):
         return self.network(x.to(torch.float32))
+    
+    def get_params(self, deep=True):
+        return self.params
 
 class SimpleMultiLayerPerceptronRegressor(torch.nn.Module):
     def __init__(self, input_size, hidden_sizes, output_size=1, activation_fn=torch.nn.ReLU, **kwargs):
         super(SimpleMultiLayerPerceptronRegressor, self).__init__()
         layers = []
         in_size = input_size
-        
+        self.params = {
+            "input_size": input_size,
+            "hidden_sizes": hidden_sizes,
+            "output_size": output_size,
+            "activation_fn": activation_fn,
+            **kwargs
+        }
         for hidden_size in hidden_sizes:
             layers.append(torch.nn.Linear(in_size, hidden_size))
             layers.append(activation_fn())
@@ -43,3 +58,6 @@ class SimpleMultiLayerPerceptronRegressor(torch.nn.Module):
         
     def forward(self, x):
         return self.network(x.to(torch.float32))
+    
+    def get_params(self, deep=True):
+        return self.params

@@ -1,3 +1,4 @@
+import os
 from src.utils.utils import *
 from src.utils.preprocessing_strategy import *
 from src.utils.model_strategies import *
@@ -68,6 +69,7 @@ class ModelBasicCreation(ModelCreation):
 
         
         x = dataset.drop(columns=[self.target])
+        column_names = x.columns.tolist()
         y = dataset[self.target]
 
         x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2) 
@@ -76,12 +78,16 @@ class ModelBasicCreation(ModelCreation):
             label=self.target,
             problem_type=self.problemType,
             eval_metric=self.evalMetric,
+            path=os.environ.get("AUTOGLUON_MODEL_DIR", "autogluon_models")
         )
 
         with mlflow.start_run():
 
             x_train_mlflow = mlflow.data.from_pandas(x_train)
             x_test_mlflow = mlflow.data.from_pandas(x_test)
+
+            # x_train_mlflow = mlflow.data.from_pandas(pd.DataFrame(x_train, columns=column_names))
+            # x_test_mlflow = mlflow.data.from_pandas(pd.DataFrame(x_test, columns=column_names))
 
             mlflow.log_input(x_train_mlflow, context="train")
             mlflow.log_input(x_test_mlflow, context="test")
@@ -222,6 +228,7 @@ class ModelAdvancedCreation(ModelCreation):
         # Split the data into training and testing sets
         
         x = dataset.drop(columns=[self.target])
+        column_names = x.columns.tolist()
         y = dataset[self.target]
         x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, shuffle= (not is_time_series))
 
@@ -233,6 +240,13 @@ class ModelAdvancedCreation(ModelCreation):
 
             x_train_mlflow = mlflow.data.from_pandas(x_train)
             x_test_mlflow = mlflow.data.from_pandas(x_test)
+            # x_train_log = pd.DataFrame(x_train, columns=column_names, dtype=object)
+            # x_train_log[self.target] = y_train
+
+            # x_train_mlflow = mlflow.data.from_pandas(x_train_log.astype(self.columnsDataType),targets=self.target)
+            # x_test_log = pd.DataFrame(x_test, columns=column_names, dtype=object)
+            # x_test_log[self.target] = y_test
+            # x_test_mlflow = mlflow.data.from_pandas(x_test_log.astype(self.columnsDataType),targets=self.target)
 
             mlflow.log_input(x_train_mlflow, context="train")
             mlflow.log_input(x_test_mlflow, context="test")

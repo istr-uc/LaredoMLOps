@@ -47,12 +47,20 @@ COPY --from=builder /project/src /project/src
 # Adding .venv/bin to PATH removes the need to "source" the venv
 ENV PATH="/project/.venv/bin:$PATH" \
     PYTHONUNBUFFERED=1 \
-    PYTHONPATH="/project"
+    PYTHONPATH="/project" \
+    MPLCONFIGDIR="/project/mpldir" \
+    AUTOGLUON_MODEL_DIR="/project/autogluon_models"
 
 EXPOSE 5050
 
+#Make user owner of the project directory so they have write permissions if needed
+
+RUN mkdir /project/mpldir && chown -R appuser:appuser /project/mpldir
+RUN mkdir /project/autogluon_models && chown -R appuser:appuser /project/autogluon_models
+
 # Switch to the non-root user
 USER appuser
+
 
 # CMD is preferred over ENTRYPOINT for arguments that might change
 # Running binary directly allows signals (like SIGTERM) to pass correctly
