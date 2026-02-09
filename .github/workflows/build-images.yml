@@ -1,0 +1,175 @@
+name: build-images
+on:
+  push:
+    branches:
+      - automatic-image-build-publish
+
+jobs:
+  check-if-backend-changed:
+    runs-on: ubuntu-latest
+    outputs:
+      backend_changed: ${{ steps.check_backend.outputs.backend_changed }}
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v2
+
+      - name: Check if backend files have changed
+        id: check_backend
+        run: |
+          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q '^backend/'; then
+            echo "backend_changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "backend_changed=false" >> $GITHUB_OUTPUT
+          fi
+  
+  check-if-frontend-changed:
+    runs-on: ubuntu-latest
+    outputs:
+      frontend_changed: ${{ steps.check_frontend.outputs.frontend_changed }}
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v2
+
+      - name: Check if frontend files have changed
+        id: check_frontend
+        run: |
+          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q '^frontend/'; then
+            echo "frontend_changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "frontend_changed=false" >> $GITHUB_OUTPUT
+          fi
+  
+  check-if-chatbot-changed:
+    runs-on: ubuntu-latest
+    outputs:
+      chatbot_changed: ${{ steps.check_chatbot.outputs.chatbot_changed }}
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v2
+
+      - name: Check if chatbot files have changed
+        id: check_chatbot
+        run: |
+          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q '^chatbot/'; then
+            echo "chatbot_changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "chatbot_changed=false" >> $GITHUB_OUTPUT
+          fi
+
+  check-if-helm-chart-changed:
+    runs-on: ubuntu-latest
+    outputs:
+      helm_chart_changed: ${{ steps.check_helm_chart.outputs.helm_chart_changed }}
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v2
+
+      - name: Check if Helm chart files have changed
+        id: check_helm_chart
+        run: |
+          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q '^helm-chart/'; then
+            echo "helm_chart_changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "helm_chart_changed=false" >> $GITHUB_OUTPUT
+          fi
+
+  helm-chart:
+    runs-on: ubuntu-latest
+    needs: check-if-helm-chart-changed
+    if: needs.check-if-helm-chart-changed.outputs.helm_chart_changed == 'true'
+    steps:
+      - name: Print message
+        run: echo "Helm chart files have changed. Packaging and pushing Helm chart..."
+    # steps:
+    #   - name: Check out the repository
+    #     uses: actions/checkout@v2
+
+    #   - name: Set up Helm
+    #     uses: azure/setup-helm@v1
+
+    #   - name: Package and push Helm chart
+    #     run: |
+    #       helm package helm-chart
+    #       helm repo index . --url https://ghcr.io/${{ github.repository_owner }}/my-helm-chart
+    #       helm push my-helm-chart-*.tgz oci://ghcr.io/${{ github.repository_owner }}/my-helm-chart
+
+  build-chatbot:
+    runs-on: ubuntu-latest
+    needs: check-if-chatbot-changed
+    if: needs.check-if-chatbot-changed.outputs.chatbot_changed == 'true'
+    steps:
+      - name: Print message
+        run: echo "Chatbot files have changed. Building and pushing chatbot Docker image..."
+    # steps:
+    #   - name: Check out the repository
+    #     uses: actions/checkout@v2
+
+    #   - name: Set up Docker Buildx
+    #     uses: docker/setup-buildx-action@v1
+
+    #   - name: Log in to ghcr.io
+    #     uses: docker/login-action@v1
+    #     with:
+    #       registry: ghcr.io
+    #       username: ${{ github.actor }}
+    #       password: ${{ secrets.GITHUB_TOKEN }}
+    #   - name: Build and push Docker image
+    #     uses: docker/build-push-action@v2
+    #     with:
+    #       context: .
+    #       push: true
+    #       tags: ghcr.io/${{ github.repository_owner }}/laredocmind:latest
+
+  build-frontend:
+    runs-on: ubuntu-latest
+    needs: check-if-frontend-changed
+    if: needs.check-if-frontend-changed.outputs.frontend_changed == 'true'
+    steps:
+      - name: Print message
+        run: echo "Frontend files have changed. Building and pushing frontend Docker image..."
+    # steps:
+    #   - name: Check out the repository
+    #     uses: actions/checkout@v2
+
+    #   - name: Set up Docker Buildx
+    #     uses: docker/setup-buildx-action@v1
+
+    #   - name: Log in to ghcr.io
+    #     uses: docker/login-action@v1
+    #     with:
+    #       registry: ghcr.io
+    #       username: ${{ github.actor }}
+    #       password: ${{ secrets.GITHUB_TOKEN }}
+    #   - name: Build and push Docker image
+    #     uses: docker/build-push-action@v2
+    #     with:
+    #       context: .
+    #       push: true
+    #       tags: ghcr.io/${{ github.repository_owner }}/laredo-frontend:latest
+
+  build-backend:
+    runs-on: ubuntu-latest
+    needs: check-if-backend-changed
+    if: needs.check-if-backend-changed.outputs.backend_changed == 'true'
+    steps:
+      - name: Print message
+        run: echo "Backend files have changed. Building and pushing backend Docker image..."
+    # steps:
+    #   - name: Check out the repository
+    #     uses: actions/checkout@v2
+
+    #   - name: Set up Docker Buildx
+    #     uses: docker/setup-buildx-action@v1
+
+    #   - name: Log in to ghcr.io
+    #     uses: docker/login-action@v1
+    #     with:
+    #       registry: ghcr.io
+    #       username: ${{ github.actor }}
+    #       password: ${{ secrets.GITHUB_TOKEN }}
+    #   - name: Build and push Docker image
+    #     uses: docker/build-push-action@v2
+    #     with:
+    #       context: .
+    #       push: true
+    #       tags: ghcr.io/${{ github.repository_owner }}/laredo-backend:latest
