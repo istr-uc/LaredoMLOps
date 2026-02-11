@@ -1,6 +1,6 @@
 apiVersion: v2
 name: LaredoMLOps
-description: A Helm chart for Kubernetes
+description: Helm chart for LaredoMLOps, a comprehensive MLOps platform for managing the entire machine learning lifecycle, from data preprocessing and model training to deployment and monitoring.
 
 # A chart can be either an 'application' or a 'library' chart.
 #
