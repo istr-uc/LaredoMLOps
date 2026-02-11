@@ -75,5 +75,28 @@
         "url": "https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.bfill.html"
       }
     }
+  },
+  "Convert_To_Sequence": {
+    "multiple_selection": true,
+    "methods": {
+      "TabularDataToSequence": {
+        "strategy": "TabularToWindowStrategy",
+        "params": {
+          "sequence_length": {
+            "type": "integer",
+            "description": "Nomber of time steps in each sequence"
+          },
+          "time_column": {
+            "type": "column",
+            "description": "Name of the time column that defines the order of the data"
+          },
+          "group_by_column": {
+            "type": "column",
+            "description": "Name of the column to group data by when creating sequences to avoid mixing different entities"
+          }
+        },
+        "url": "https://scikit-learn.org/stable/modules/generated/sklearn.impute.SimpleImputer.html"
+      }
+    }
   }
 }

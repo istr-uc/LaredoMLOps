@@ -1,38 +1,68 @@
-FROM python:3.11 as builder
+# 1. Fetch the uv binary from the official image (Faster/Cleaner than curling)
+FROM ghcr.io/astral-sh/uv:0.9.16 AS uv
 
-SHELL ["/bin/bash", "-c"] 
+# 2. Builder Stage
+FROM python:3.11-slim-bookworm AS builder
 
-# COPY requirements.txt /tmp/
-#RUN mkdir project
 WORKDIR /project
-# Install Flask
-COPY .python-version .
-COPY pyproject.toml .
-COPY uv.lock .
+
+# Copy uv binary from the special stage
+COPY --from=uv /uv /uvx /bin/
+
+# Set env vars to speed up build and ensure consistent behavior
+ENV UV_COMPILE_BYTECODE=1 \
+    UV_LINK_MODE=copy \
+    UV_PYTHON_DOWNLOADS=never 
+
+# --- OPTIMIZATION: Dependency Caching ---
+# Copy ONLY dependency files first. 
+# This ensures 'uv sync' is cached unless dependencies actually change.
+COPY pyproject.toml uv.lock ./
+
+# Install dependencies (without dev dependencies like pytest)
+# --no-install-project: Installs libraries but waits on your actual code
+RUN uv sync --frozen --no-dev --no-install-project
+
+# Now copy the source code (Changing code won't trigger a re-install of deps)
 COPY src ./src
-COPY test ./test
 
-# The installer requires curl (and certificates) to download the release archive
-RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates
+# Install the project itself (if your project is a package) or verify env
+RUN uv sync --frozen --no-dev
 
-# Download the latest installer
-ADD https://astral.sh/uv/install.sh /uv-installer.sh
+# 3. Final Runtime Stage
+FROM python:3.11-slim-bookworm
 
-# Run the installer then remove it
-RUN sh /uv-installer.sh && rm /uv-installer.sh
+RUN apt-get update && apt-get install --no-install-recommends -y libomp-dev libgomp1
 
-# Ensure the installed binary is on the `PATH`
-ENV PATH="/root/.local/bin/:$PATH"
+WORKDIR /project
 
-RUN uv sync
+# Security: Create a non-root user
+RUN groupadd -r appuser && useradd -r -g appuser appuser
 
+# Copy the environment and application code
+COPY --from=builder /project/.venv /project/.venv
+COPY --from=builder /project/src /project/src
 
-FROM python:3.11
+# Set environment variables
+# Adding .venv/bin to PATH removes the need to "source" the venv
+ENV PATH="/project/.venv/bin:$PATH" \
+    PYTHONUNBUFFERED=1 \
+    PYTHONPATH="/project" \
+    MPLCONFIGDIR="/project/mpldir" \
+    AUTOGLUON_MODEL_DIR="/project/autogluon_models"
 
 EXPOSE 5050
 
-COPY --from=builder /project /project
+#Make user owner of the project directory so they have write permissions if needed
 
-WORKDIR /project
-# Run the backend service
-ENTRYPOINT source /project/.venv/bin/activate && export PYTHONPATH=/project && /project/.venv/bin/gunicorn -w 4 src.wsgi:app -b 0.0.0.0:5050 -t 0
+RUN mkdir /project/mpldir && chown -R appuser:appuser /project/mpldir
+RUN mkdir /project/autogluon_models && chown -R appuser:appuser /project/autogluon_models
+
+# Switch to the non-root user
+USER appuser
+
+
+# CMD is preferred over ENTRYPOINT for arguments that might change
+# Running binary directly allows signals (like SIGTERM) to pass correctly
+# CMD ["gunicorn", "-w", "4", "src.wsgi:app", "-b", "0.0.0.0:5050", "-t", "0"]
+ENTRYPOINT gunicorn -w 4 src.wsgi:app -b 0.0.0.0:5050 -t 0

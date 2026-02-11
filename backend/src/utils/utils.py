@@ -6,12 +6,14 @@ from lightgbm import basic
 import numpy as np
 import warnings
 import torch
+import skorch
 import re
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import FunctionTransformer
 from sklearn.linear_model import LogisticRegression
 from sklearn.base import BaseEstimator, TransformerMixin
 import mlflow
+
 def extract_layers_as_nested_dict(model_str):
     """
     Parses a model string and returns a nested dictionary representing the model's layer hierarchy.
@@ -308,3 +310,32 @@ class ValidationError(Exception):
         super().__init__(message)
         self.status_code = status_code
         self.message = message
+
+def get_printable_pytorch_pipeline(pipeline):
+    '''
+    Converts a sklearn pipeline with pytorch models (wapped using skorch) to a printable pipeline
+    by replacing the pytorch models with PlaceholderTransformer with the model description.
+    Args:
+        pipeline: sklearn.pipeline.Pipeline
+    Returns:
+        sklearn.pipeline.Pipeline with PlaceholderTransformer
+    '''
+    # Get the steps of the pipeline
+    steps = []
+    for name, estimator in pipeline.steps:
+        if isinstance(estimator, skorch.NeuralNetClassifier) or isinstance(estimator, skorch.NeuralNetRegressor):
+            # Extract the module (pytorch model) from the skorch wrapper
+            module = estimator.module_
+            nested_dict = extract_layers_as_nested_dict(str(module))
+
+            # Build sklearn pipeline
+            sklearn_pipeline = nested_dict_to_pipeline(nested_dict)
+
+            # Wrap in custom pipeline 
+            wrapper = NeuralNetwork(steps=sklearn_pipeline.steps, hyperparams=module.get_params())
+            steps.append((name, wrapper))
+        else:
+            steps.append((name, estimator))
+    
+    printable_pipeline = Pipeline(steps)
+    return printable_pipeline

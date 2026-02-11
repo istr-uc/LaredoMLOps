@@ -111,7 +111,7 @@ class GraphInitializer:
         """
         question = state["question"].content  # type: ignore
         prompt = TRANSLATE_OPTIMIZE_QUESTION_PROMPT.format(question=question)
-        improved_question = self._model_manager.flash_llm.invoke(prompt).content  # type: ignore
+        improved_question = self._model_manager.translation_summarization_llm.invoke(prompt).content  # type: ignore
         improved_message = HumanMessage(content=improved_question)
         return JsonState(improved_question=improved_message)
 
@@ -241,7 +241,12 @@ class GraphInitializer:
 
         # Append the context and question to the system message
         system_messages.append(
-            SystemMessage(
+            # SystemMessage(
+            #     content=ANSWER_PROMPT.format(
+            #         context=combined_context, question=question, language=language
+            #     )
+            # )
+            HumanMessage(
                 content=ANSWER_PROMPT.format(
                     context=combined_context, question=question, language=language
                 )
@@ -250,14 +255,20 @@ class GraphInitializer:
 
         # If a summary exists, append it to the system message
         if summary:
+            # system_messages.append(
+            #     SystemMessage(content=SUMMARY_PROMPT.format(summary=summary))
+            # )
             system_messages.append(
-                SystemMessage(content=SUMMARY_PROMPT.format(summary=summary))
+                HumanMessage(content=SUMMARY_PROMPT.format(summary=summary))
             )
 
         # Append recent messages to the system message
         if messages:
+            # system_messages.append(
+            #     SystemMessage(content=RECENT_MESSAGES_PROMPT.format(messages=messages))
+            # )
             system_messages.append(
-                SystemMessage(content=RECENT_MESSAGES_PROMPT.format(messages=messages))
+                HumanMessage(content=RECENT_MESSAGES_PROMPT.format(messages=messages))
             )
 
         # Add the user question to the message history
@@ -300,7 +311,10 @@ class GraphInitializer:
 
         # If there is an existing summary, format it as part of the prompt for summarization
         system_messages.append(
-            SystemMessage(
+            # SystemMessage(
+            #     content=SUMMARIZATION_PROMPT.format(summary=summary, messages=messages)
+            # )
+            HumanMessage(
                 content=SUMMARIZATION_PROMPT.format(summary=summary, messages=messages)
             )
         )
@@ -309,7 +323,7 @@ class GraphInitializer:
         system_messages.append(HumanMessage(content="Summarize the conversation."))
 
         # Invoke the model with the constructed summarization prompt
-        response = self._model_manager.flash_llm.invoke(system_messages)  # type: ignore
+        response = self._model_manager.translation_summarization_llm.invoke(system_messages)  # type: ignore
 
         # Identify old messages to remove from the conversation history
         delete_messages: List[RemoveMessage] = [

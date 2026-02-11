@@ -45,6 +45,7 @@ function ModelCreation() {
     const [hasHeader, setHasHeader] = useState(true)
     const [columnsTypeIndicated, setColumnsTypeIndicated] = useState(false)
     const [target, setTarget] = useState("")
+    const [usableColumns, setUsableColumns] = useState([])
 
     const [columnsDropSelected, setColumnsDropSelected] = useState(false)
     const [dropColumns, setDropColumns] = useState([])
@@ -173,10 +174,13 @@ function ModelCreation() {
             }
         } else if (creationType == CreationTypes.Advanced) {
             let strategy = algorithmData[problemType][algorithm].strategy
+            let implementation = algorithmData[problemType][algorithm].implementation
             params = {
                 ...params,
                 strategy,
-                algorithm
+                algorithm,
+                implementation
+                /* Add implementation to handle the input size and num of classes at model creation step */
             }
         }
         
@@ -333,6 +337,9 @@ function ModelCreation() {
                     setDropColumns={setDropColumns}
                     selectedMethods={preprocessingMethods}
                     setSelectedMethods={setPreprocessingMethods}
+                    target={target}
+                    usableColumns={usableColumns}
+                    setUsableColumns={setUsableColumns}
                     onNextStep={handleNextStep}
                 />
             }

@@ -1,7 +1,7 @@
 import os
 from src.utils.creation_types import *
-from src.utils.preprocessing_strategy import *
 from src.utils.model_strategies import *
+from src.utils.preprocessing_strategy import *
 import pandas as pd
 from flask import Flask, jsonify, request, request
 from flask_restful import Api
@@ -61,11 +61,14 @@ def get_model(model_name):
     run_id = model[0].latest_versions[0].run_id
     run = mlflow.get_run(run_id)
     estimator_uri = run.info.artifact_uri + "/estimator.html"
-
     estimator = mlflow.artifacts.load_text(estimator_uri)
     dataset = run.inputs.dataset_inputs[0].dataset.schema
-
-    is_deployed =  search_deployment(model_name)
+    if dataset == '' or dataset is None:
+        dataset = '{}'
+    try:
+        is_deployed =  search_deployment(model_name)
+    except:
+        is_deployed = False
 
     response_data = {
         "estimator": estimator,
@@ -73,7 +76,7 @@ def get_model(model_name):
         "dataset" : dataset,
         "is_deployed" : is_deployed
     }
-
+    # print("response_data: ", response_data) # Debugging line
     return jsonify(response_data), 200
 
 @app.route('/models', methods=['POST'])
@@ -193,14 +196,17 @@ def get_deployments():
 
     v1 = client.CustomObjectsApi()
 
-    deployments = v1.list_namespaced_custom_object(
-        group="machinelearning.seldon.io",
-        version="v1",
-        plural="seldondeployments",
-        namespace="laredo")
+    # If not found, raises catch the exception and return an empty list
+    try:
+        deployments = v1.list_namespaced_custom_object(
+            group="machinelearning.seldon.io",
+            version="v1",
+            plural="seldondeployments",
+            namespace="laredo")
+        deployments = deployments["items"]
+    except client.exceptions.ApiException as e:
+        deployments = []
 
-
-    deployments = deployments["items"]
     #print("deployments: ", len(deployments))
     return deployments
 
