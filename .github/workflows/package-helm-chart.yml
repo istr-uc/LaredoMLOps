@@ -1,0 +1,34 @@
+name: Build and push Docker image for helm
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'helm-chart/**'  # Trigger only if files in the 'helm-chart' directory are changed
+env:
+  REGISTRY: ghcr.io
+jobs:
+  build-and-push-image:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Log in to the Container registry
+        run: |
+          echo ${{ secrets.GITHUB_TOKEN }} | helm registry login ghcr.io -u $ --password-stdin
+
+      - name: Package and push Helm chart
+        run: |
+          helm package ./helm-chart
+          helm push helm-chart*.tgz oci://ghcr.io/istr-uc/
