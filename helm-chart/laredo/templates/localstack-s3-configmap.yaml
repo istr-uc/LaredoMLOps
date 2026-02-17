@@ -1,0 +1,35 @@
+{{- if .Values.backend.deploy_s3_storage }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: localstack-init
+  namespace: {{ .Values.frontend.namespace}}
+data:
+  init-s3.sh: |
+    #!/bin/bash
+    echo "Initializing S3 bucket..."
+    awslocal s3 mb s3://mlflow-artifacts|| true
+    awslocal s3 mb s3://ml-datasets || true
+    
+    echo "Applying CORS rules for frontend uploads..."
+    awslocal s3api put-bucket-cors --bucket mlflow-artifacts --cors-configuration '{
+      "CORSRules": [
+        {
+          "AllowedHeaders": ["*"],
+          "AllowedMethods": ["GET", "PUT", "POST", "DELETE", "HEAD"],
+          "AllowedOrigins": ["*"],
+          "ExposeHeaders": ["ETag"]
+        }
+      ]
+    }'
+    awslocal s3api put-bucket-cors --bucket ml-datasets --cors-configuration '{
+      "CORSRules": [
+        {
+          "AllowedHeaders": ["*"],
+          "AllowedMethods": ["GET", "PUT", "POST", "DELETE", "HEAD"],
+          "AllowedOrigins": ["*"],
+          "ExposeHeaders": ["ETag"]
+        }
+      ]
+    }'
+{{- end }}

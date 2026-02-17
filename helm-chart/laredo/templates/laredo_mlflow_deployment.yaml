@@ -16,7 +16,36 @@ spec:
     spec:
       containers:
       - name: mlflow
-        image: ghcr.io/dintenr/mlflow-istr:0.0.1
+        # image: ghcr.io/dintenr/mlflow-istr:0.0.1
+        image: mlflow-laredo:0.0.2
         ports:
         - containerPort: 5000
+        {{- if .Values.backend.mlflow_externalStorage }}
+        env: 
+        # - name: MLFLOW_DEFAULT_ARTIFACT_ROOT
+        #   value: {{ quote .Values.backend.DEFAULT_ARTIFACT_ROOT }}
+        - name: MLFLOW_BACKEND_STORE_URI
+          value: "postgresql://{{ .Values.backend.postgres_user }}:{{ .Values.backend.postgres_password }}@{{ .Values.backend.postgres_host }}:{{ .Values.backend.postgres_port }}/{{ .Values.backend.postgres_db_name }}"
+        - name: MLFLOW_ARTIFACTS_DESTINATION
+          value: {{ quote .Values.backend.mlflow_artifact_uri }}
+        - name: MLFLOW_S3_ENDPOINT_URL
+          value: {{ quote .Values.backend.MLFLOW_S3_ENDPOINT_URL }}
+        {{- if and .Values.backend.AWS_ACCESS_KEY_ID .Values.backend.AWS_SECRET_ACCESS_KEY }}
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: laredo-mlflow-secret
+              key: AWS_ACCESS_KEY_ID
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: laredo-mlflow-secret
+              key: AWS_SECRET_ACCESS_KEY
+        - name: AWS_DEFAULT_REGION
+          valueFrom:
+            secretKeyRef:
+              name: laredo-mlflow-secret
+              key: AWS_DEFAULT_REGION
+        {{- end }}
+        {{- end }}
 {{- end }}

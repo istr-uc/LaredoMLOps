@@ -45,9 +45,33 @@ backend:
     type: ClusterIP
     port: 5050
     
+  deploy_s3_storage: true
+  s3_storage_size: 10Gi
+  s3_service_port: 4566
+
+  deploy_postgres: true
+  postgres_admin_password: "admin123" # Handle using secrets
+  postgres_service_port: 5432
+  postgres_storage_size: 10Gi
+
   deploy_mlflow: true
   mlflow_tracking_uri_ip: mlflow-service
   mlflow_tracking_uri_port: '5000'
+  mlflow_externalStorage: true
+  mlflow_artifact_uri: "s3://mlflow-artifacts/artifacts"
+  postgres_db_name: "mlflow"
+  postgres_user: "postgres"
+  postgres_password: "admin123"
+  postgres_host: "postgres"
+  postgres_port: 5432
+  MLFLOW_S3_ENDPOINT_URL: http://localstack-service:4566
+  DEFAULT_ARTIFACT_ROOT: "mlflow-artifacts:/artifacts"
+  AWS_ACCESS_KEY_ID: "test"
+  AWS_SECRET_ACCESS_KEY: "test"
+  AWS_DEFAULT_REGION: "us-east-1"
+
+
+
 frontend:
   replicaCount: 1
   namespace: laredo
