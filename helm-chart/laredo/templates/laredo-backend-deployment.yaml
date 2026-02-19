@@ -26,5 +26,24 @@ spec:
           value: {{ quote .Values.backend.mlflow_tracking_uri_ip }}
         - name: TRACKING_URI_PORT
           value: {{ quote .Values.backend.mlflow_tracking_uri_port }}
+        {{- if and .Values.backend.AWS_ACCESS_KEY_ID .Values.backend.AWS_SECRET_ACCESS_KEY }}
+        - name: S3_ENDPOINT_URL
+          value: {{ quote .Values.backend.MLFLOW_S3_ENDPOINT_URL }}
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: laredo-mlflow-secret
+              key: AWS_ACCESS_KEY_ID
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: laredo-mlflow-secret
+              key: AWS_SECRET_ACCESS_KEY
+        - name: AWS_DEFAULT_REGION
+          valueFrom:
+            secretKeyRef:
+              name: laredo-mlflow-secret
+              key: AWS_DEFAULT_REGION
+        {{- end }}
         ports:
         - containerPort: {{ .Values.backend.service.port }}

@@ -2,11 +2,12 @@ import { FileUploader } from 'react-drag-drop-files'
 import Papa from 'papaparse'
 import DatasetChecking from '@pages/ModelCreation/DatasetUploading/DatasetChecking'
 import ColumnConfigurationPanel from '@pages/ModelCreation/DatasetUploading/ColumnConfigurationPanel'
-import uploadIcon from '@assets/images/uploadIcon.svg' 
+import uploadIcon from '@assets/images/uploadIcon.svg'
+import axios from 'axios' 
 
 function DatasetUploading({datasetFile, setDatasetFile, columnsDataType, setColumnsDataType, preview, setPreview,
     datasetUploaded, setDatasetUploaded, columns, setColumns, hasHeader, setHasHeader, columnsTypeIndicated,
-    setColumnsTypeIndicated, target, setTarget, onNextStep}) {    
+    setColumnsTypeIndicated, target, setTarget, onNextStep, step, setStep}) {    
 
     const handleChange = (file) => {
         setDatasetFile(file)
@@ -42,15 +43,67 @@ function DatasetUploading({datasetFile, setDatasetFile, columnsDataType, setColu
             },
         })
     }
+    // Old code, trying a new approach based on states
+    // const onConfirm = () => {
+    //     setDatasetUploaded(true)
+    //     if (datasetUploaded) {
+    //         setColumnsTypeIndicated(true)
+    //     }else {
+    //     // After confirming the dataset the dataset is uploaded to the artifact store
+    //     // Ask api for a presigned url to upload the dataset and then upload it
+    //     uploadDatasetToS3()
+    //     }
+        
+    // }
+    const onConfirm = async () => {
+        if (step === "dataset") {
+            setDatasetUploaded(true)
+            setStep("uploading")
 
-    const onConfirm = () => {
-        setDatasetUploaded(true)
-        if (datasetUploaded) {
+            try {
+                await uploadDatasetToS3()
+                setStep("columns")
+            } catch (err) {
+                console.error(err)
+                setDatasetUploaded(false)
+                setStep("dataset") // rollback if upload fails
+            }
+            return
+        }
+
+        if (step === "columns") {
             setColumnsTypeIndicated(true)
+            setStep("done")
+        }
+    }
+
+    const uploadDatasetToS3 = async () => {
+        try{
+            const apiUrl = `/api/obtain-s3-presigned-put-url`
+            let params = {
+                'datasetFilename': datasetFile.name
+            }
+            const response = await axios.post(apiUrl, params)
+            let presignedUrl = response.data.presigned_url
+            // Workaround to use the presigned url in development
+            const publicUrl = presignedUrl.replace( 
+                "localstack-service:4566",
+                "localhost:4566"
+            )
+            await axios.put(publicUrl, datasetFile, {
+                headers: {
+                    'Content-Type': datasetFile.type
+                }
+            })
+            console.log('Dataset uploaded successfully to S3')
+        } catch (error) {
+            console.error('Error uploading dataset to S3:', error)
+            throw error
         }
     }
 
     const onReject = () => {
+        setStep("dataset")
         setColumnsTypeIndicated(false)
         setDatasetUploaded(false)
         setDatasetFile(null)

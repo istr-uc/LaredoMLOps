@@ -1,4 +1,8 @@
+from fileinput import filename
+from io import StringIO
 import os
+
+import boto3
 from src.utils.utils import *
 from src.utils.preprocessing_strategy import *
 from src.utils.model_strategies import *
@@ -29,6 +33,19 @@ class ModelCreation():
         for param in kwargs.keys():
             setattr(self, param, kwargs[param])
 
+    def get_dataset_from_s3(self, dataset_filename):
+        s3_client = boto3.client(service_name="s3",
+                                endpoint_url=os.getenv("S3_ENDPOINT_URL"),
+                                aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
+                                aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
+                                region_name=os.getenv("AWS_DEFAULT_REGION")) 
+        bucket_name = "ml-datasets"
+        object_key = dataset_filename
+
+        response = s3_client.get_object(Bucket=bucket_name, Key=object_key)
+        file_content = response["Body"].read()
+        return file_content
+    
     def create(self):
         pass
 
@@ -58,13 +75,17 @@ class ModelCreation():
 
 class ModelBasicCreation(ModelCreation):
     required_params = [
-        'modelName', 'problemType', 'datasetJSON', 'columnsDataType',
+        'modelName', 'problemType', 'datasetFilename', 'columnsDataType',
         'target', 'preset', 'evalMetric', 'timeLimit'
     ]
 
     def create(self):
-
-        dataset = pd.DataFrame.from_dict(self.datasetJSON)
+        # Load dataset from s3 object store
+        dataset_content = self.get_dataset_from_s3(self.datasetFilename)
+        # dataset = pd.read_csv(pd.compat.StringIO(dataset_content.decode('utf-8')))
+        dataset = pd.read_csv(StringIO(dataset_content.decode('utf-8')))
+        # Old code to read dataset from http query body, keep for reference
+        # dataset = pd.DataFrame.from_dict(self.datasetJSON)
         dataset = dataset.astype(self.columnsDataType)
 
         
@@ -140,7 +161,7 @@ class ModelBasicCreation(ModelCreation):
 
 class ModelAdvancedCreation(ModelCreation):
     required_params = [
-        'modelName', 'problemType', 'datasetJSON', 'columnsDataType',
+        'modelName', 'problemType', 'datasetFilename', 'columnsDataType',
         'target', 'strategy', 'algorithm', 'implementation'
     ]
     dimensionality_reduction_methods = ['pca', 'selectkbest']
@@ -171,8 +192,12 @@ class ModelAdvancedCreation(ModelCreation):
 
         preprocessing_methods = self.preprocessingMethods
         parameters_value = self.parametersValue
-
-        dataset = pd.DataFrame.from_dict(self.datasetJSON)
+        # Load dataset from s3 object store
+        dataset_content = self.get_dataset_from_s3(self.datasetFilename)
+        # dataset = pd.read_csv(pd.compat.StringIO(dataset_content.decode('utf-8')))
+        dataset = pd.read_csv(StringIO(dataset_content.decode('utf-8')))
+        # Old code to read dataset from http query body, keep for reference
+        # dataset = pd.DataFrame.from_dict(self.datasetJSON)
         dataset = dataset.astype(self.columnsDataType)
         is_time_series = False
         if dataset[self.target].dtype == "object":

@@ -5,11 +5,11 @@ backend:
   replicaCount: 1
   namespace: laredo
   image:
-    repository: ghcr.io/dintenr/laredo-backend
-    # repository: laredo/backend
+    # repository: ghcr.io/dintenr/laredo-backend
+    repository: laredo/backend
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: 0.0.2
+    tag: 1.1.0
 
   imagePullSecrets: []
   nameOverride: ""
@@ -45,11 +45,11 @@ backend:
     type: ClusterIP
     port: 5050
     
-  deploy_s3_storage: true
+  deploy_s3_storage: false
   s3_storage_size: 10Gi
   s3_service_port: 4566
 
-  deploy_postgres: true
+  deploy_postgres: false
   postgres_admin_password: "admin123" # Handle using secrets
   postgres_service_port: 5432
   postgres_storage_size: 10Gi
@@ -76,11 +76,11 @@ frontend:
   replicaCount: 1
   namespace: laredo
   image:
-    repository: ghcr.io/dintenr/laredo-frontend
-    # repository: laredo/frontend
+    # repository: ghcr.io/dintenr/laredo-frontend
+    repository: laredo/frontend
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: 0.1.0
+    tag: 1.1.0
 
   imagePullSecrets: []
   nameOverride: ""

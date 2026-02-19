@@ -41,6 +41,7 @@ function ModelCreation() {
     const [columnsDataType, setColumnsDataType] = useState({})
     const [preview, setPreview] = useState([])
     const [datasetUploaded, setDatasetUploaded] = useState(false)
+    const [step, setStep] = useState("dataset") 
     const [columns, setColumns] = useState([])
     const [hasHeader, setHasHeader] = useState(true)
     const [columnsTypeIndicated, setColumnsTypeIndicated] = useState(false)
@@ -149,16 +150,18 @@ function ModelCreation() {
     }
     
     const callAPI = async() => {
-        const datasetJSON = await convertDatasetToJSON(datasetFile)
+        // Old code to convert dataset to JSON and send it in the request body, keep for reference
+        // const datasetJSON = await convertDatasetToJSON(datasetFile)
         
         // const apiIp = import.meta.env.VITE_API_IP
         // const apiPort = import.meta.env.VITE_API_PORT
         // const apiUrl = `http://${apiIp}:${apiPort}/models`
         const apiUrl = `/api/models`
+        let datasetFilename = datasetFile.name
         let params = {
             modelName,
             problemType,
-            datasetJSON,
+            datasetFilename, // Send dataset file and read it in backend to avoid sending big datasets in the request body
             columnsDataType,
             target,
             preprocessingMethods,
@@ -326,6 +329,8 @@ function ModelCreation() {
                     target={target}
                     setTarget={setTarget}
                     onNextStep={handleNextStep}
+                    step={step}
+                    setStep={setStep}
                 />
             }
             {activeButton === Steps.Preprocessing && 

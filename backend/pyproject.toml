@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "autogluon-tabular>=1.4.0",
+    "boto3==1.42.51",
     "flask==2.2.5",
     "flask-cors==3.0.10",
     "flask-opentracing==1.1.0",

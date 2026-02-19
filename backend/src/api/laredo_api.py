@@ -1,4 +1,6 @@
 import os
+
+import boto3
 from src.utils.creation_types import *
 from src.utils.model_strategies import *
 from src.utils.preprocessing_strategy import *
@@ -91,7 +93,7 @@ def train_model():
         return jsonify({
             "error": f"Invalid creation type '{type_str}'. Must be one of: {list(CREATION_TYPE.keys())}" 
         }), 400
-
+    print(f"Received request to create model with type '{type_str}' and params: {params}") # Debugging line
     model_creator = model_creation_type(**params)
     metrics = model_creator.create()
 
@@ -244,6 +246,24 @@ def get_column_types():
     
     return jsonify(column_types), 200
 
+@app.route("/obtain-s3-presigned-put-url", methods=["POST"])
+def get_s3_signed_url():
+    data = request.json
+    dataset_filename = data.get('datasetFilename')
+    s3_client = boto3.client(
+        "s3",
+        endpoint_url=os.getenv("S3_ENDPOINT_URL"),
+        aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
+        aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
+        region_name=os.getenv("AWS_DEFAULT_REGION")
+    )
+    presigned_url = s3_client.generate_presigned_url(
+        'put_object',
+        Params={'Bucket': 'ml-datasets', 'Key': dataset_filename},
+        ExpiresIn=3600
+    )
+    print(f"Generated presigned URL for {dataset_filename}: {presigned_url}") # Debugging line
+    return jsonify({"presigned_url": presigned_url}), 200
 
 @app.errorhandler(ValidationError)
 def handle_validation_error(e: ValidationError):
