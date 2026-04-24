@@ -68,6 +68,7 @@ function ModelCreation() {
 
     const [hasStarted, setHasStarted] = useState(false)
     const [isTraining, setIsTraining] = useState(false)
+    const [timeoutReached, setTimeoutReached] = useState(false)
 
     const navigate = useNavigate()
 
@@ -127,13 +128,41 @@ function ModelCreation() {
                 setIsTraining(true)
                 setActiveButton(Steps.Evaluation)
                 try {
-                    const response = await callAPI()
-                    if (response.status == 201) {
-                        setMetrics(response.data)
+                    // Old code that waits for the training to finish and then gets the metrics, keep for reference
+                    // const response = await callAPI()                    
+                    // if (response.status == 201) {
+                    //     setMetrics(response.data)
+                    //     setIsTraining(false)
+                    // } else {
+                    //     setMetrics(null)
+                    //     setIsTraining(false)
+                    // }
+
+                    // New code that calls the API to start the training and then polls the API every 5 seconds to check if the training is finished and get the metrics 
+                    const response = await callAPI() // response should contain jobId and runId to identify the training job
+                    const jobId = response.data.job_id
+                    const runId = response.data.run_id
+                    const timeout = 3 * 60 * 1000 // 3 minutes
+                    let status = 'running'
+                    const start = Date.now()
+                    let statusResponse = null
+                    while (status == 'running' && Date.now() - start < timeout) {
+                        statusResponse = await axios.get(`/api/job/status?jobId=${jobId}&runId=${runId}`)
+                        status = statusResponse.data.status
+                        // Wait for 5 seconds before polling again
+                        await new Promise(resolve => setTimeout(resolve, 5000))
+                    }
+                    // let statusResponse = await axios.get(`/api/job/status?jobId=${jobId}&runId=${runId}`)
+                    
+                    if (status == 'succeeded') {
                         setIsTraining(false)
-                    } else {
+                        setMetrics(statusResponse.data.results)
+                    } else if (status == 'failed') {
+                        setIsTraining(false)
                         setMetrics(null)
-                        setIsTraining(false)
+                    } else if (status == 'running') {
+                        setMetrics(null)
+                        setTimeoutReached(true)
                     }
                 } catch (error) {
                     console.error('Error calling API:', error)
@@ -370,6 +399,7 @@ function ModelCreation() {
             {activeButton === Steps.Evaluation &&                 
                 <>
                     {isTraining ? (
+                        !timeoutReached ? (
                         <div className='flex flex-col items-center justify-center h-[66vh]'>
                             <svg class="text-gray-300 animate-spin" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"
                                 width="100" height="100">
@@ -388,6 +418,14 @@ function ModelCreation() {
                                 This process may take some time. If you prefer not to wait, you can view your trained model in the available models section.
                             </h2>
                         </div>
+                        ) : (
+                            <div className='flex flex-col items-center justify-center h-[66vh]'>
+                                <h1 className='text-5xl mt-7 text-white-500'>The training is taking too long</h1>
+                                <h2 className='text-2xl mt-7 text-white text-center mx-12'>
+                                    This looks like is going to take a while so we have stopped waiting for the results. You can check if your model has finished training by going to the available models section.
+                                </h2>
+                            </div>
+                        )
                     ) : (
                         <>
                             {metrics ? (

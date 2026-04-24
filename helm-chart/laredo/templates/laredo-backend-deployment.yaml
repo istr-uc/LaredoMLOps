@@ -29,6 +29,12 @@ spec:
         {{- if and .Values.backend.AWS_ACCESS_KEY_ID .Values.backend.AWS_SECRET_ACCESS_KEY }}
         - name: S3_ENDPOINT_URL
           value: {{ quote .Values.backend.MLFLOW_S3_ENDPOINT_URL }}
+        - name: DATASET_BUCKET_NAME
+          value: {{ quote .Values.backend.DATASET_BUCKET_NAME }}
+        - name: TRAINER_IMAGE
+          value: {{ .Values.backend.TRAINER_IMAGE}}
+        - name: TRAINER_TAG
+          value: {{ .Values.backend.TRAINER_TAG}}
         - name: AWS_ACCESS_KEY_ID
           valueFrom:
             secretKeyRef:

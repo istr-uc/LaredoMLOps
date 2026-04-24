@@ -17,20 +17,23 @@ ENV UV_COMPILE_BYTECODE=1 \
 # --- OPTIMIZATION: Dependency Caching ---
 # Copy ONLY dependency files first. 
 # This ensures 'uv sync' is cached unless dependencies actually change.
-COPY pyproject.toml uv.lock ./
+# COPY pyproject.toml uv.lock ./
+COPY pyproject.toml ./
+RUN uv sync
 
 # Install dependencies (without dev dependencies like pytest)
 # --no-install-project: Installs libraries but waits on your actual code
-RUN uv sync --frozen --no-dev --no-install-project
+RUN uv sync --frozen --no-dev --no-install-project --extra "trainer"
 
 # Now copy the source code (Changing code won't trigger a re-install of deps)
-COPY src ./src
+COPY src/trainer ./src/trainer
+COPY src/utils ./src/utils
 
 # Install the project itself (if your project is a package) or verify env
-RUN uv sync --frozen --no-dev
+RUN uv sync --frozen --no-dev --extra "trainer"
 
 # 3. Final Runtime Stage
-FROM python:3.11-slim-bookworm
+# FROM python:3.11-slim-bookworm
 
 RUN apt-get update && apt-get install --no-install-recommends -y libomp-dev libgomp1
 
@@ -40,8 +43,8 @@ WORKDIR /project
 RUN groupadd -r appuser && useradd -r -g appuser appuser
 
 # Copy the environment and application code
-COPY --from=builder /project/.venv /project/.venv
-COPY --from=builder /project/src /project/src
+# COPY --from=builder /project/.venv /project/.venv
+# COPY --from=builder /project/src /project/src
 
 # Set environment variables
 # Adding .venv/bin to PATH removes the need to "source" the venv
@@ -51,7 +54,7 @@ ENV PATH="/project/.venv/bin:$PATH" \
     MPLCONFIGDIR="/project/mpldir" \
     AUTOGLUON_MODEL_DIR="/project/autogluon_models"
 
-EXPOSE 5050
+# EXPOSE 5050
 
 #Make user owner of the project directory so they have write permissions if needed
 
@@ -59,10 +62,10 @@ RUN mkdir /project/mpldir && chown -R appuser:appuser /project/mpldir
 RUN mkdir /project/autogluon_models && chown -R appuser:appuser /project/autogluon_models
 
 # Switch to the non-root user
-USER appuser
+# USER appuser
 
 
 # CMD is preferred over ENTRYPOINT for arguments that might change
 # Running binary directly allows signals (like SIGTERM) to pass correctly
 # CMD ["gunicorn", "-w", "4", "src.wsgi:app", "-b", "0.0.0.0:5050", "-t", "0"]
-ENTRYPOINT gunicorn -w 4 src.wsgi:app -b 0.0.0.0:5050 -t 0
+ENTRYPOINT ["uv", "run", "src/trainer/trainer.py"]

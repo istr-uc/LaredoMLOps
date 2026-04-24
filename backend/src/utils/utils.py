@@ -304,12 +304,6 @@ class AutogluonModelMlflowWrapper(mlflow.pyfunc.PythonModel):
                     features.append(sample)
                     labels.append(y[i])
         return np.array(features), np.array(labels)
-    
-class ValidationError(Exception):
-    def __init__(self, message, status_code):
-        super().__init__(message)
-        self.status_code = status_code
-        self.message = message
 
 def get_printable_pytorch_pipeline(pipeline):
     '''

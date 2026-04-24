@@ -45,7 +45,7 @@ backend:
     type: ClusterIP
     port: 5050
     
-  deploy_s3_storage: false
+  deploy_s3_storage: true
   s3_storage_size: 10Gi
   s3_service_port: 4566
 
@@ -69,8 +69,9 @@ backend:
   AWS_ACCESS_KEY_ID: "test"
   AWS_SECRET_ACCESS_KEY: "test"
   AWS_DEFAULT_REGION: "us-east-1"
-
-
+  DATASET_BUCKET_NAME: "ml-datasets"
+  TRAINER_IMAGE: "laredo/trainer"
+  TRAINER_TAG: "0.1.0"
 
 frontend:
   replicaCount: 1

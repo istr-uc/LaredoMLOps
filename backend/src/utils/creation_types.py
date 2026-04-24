@@ -19,7 +19,8 @@ import mlflow
 class ModelCreation():
     required_parameters = []
 
-    def __init__(self, **kwargs):
+    def __init__(self, run_id, **kwargs):
+        self.run_id = run_id
         self.validate(kwargs)
         self.set_params_as_attributes(kwargs)
 
@@ -33,19 +34,25 @@ class ModelCreation():
         for param in kwargs.keys():
             setattr(self, param, kwargs[param])
 
-    def get_dataset_from_s3(self, dataset_filename):
-        s3_client = boto3.client(service_name="s3",
-                                endpoint_url=os.getenv("S3_ENDPOINT_URL"),
-                                aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
-                                aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
-                                region_name=os.getenv("AWS_DEFAULT_REGION")) 
-        bucket_name = "ml-datasets"
-        object_key = dataset_filename
+    def get_dataset_from_s3(self, presigned_url):
+        # This code is for local testing, 
+        # for production we will use the presigned url directly to get the dataset
+        # without using boto3
+        # s3_client = boto3.client(service_name="s3",
+        #                         endpoint_url=os.getenv("S3_ENDPOINT_URL"),
+        #                         aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
+        #                         aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
+        #                         region_name=os.getenv("AWS_DEFAULT_REGION")) 
+        # bucket_name = "ml-datasets"
+        # object_key = dataset_filename
 
-        response = s3_client.get_object(Bucket=bucket_name, Key=object_key)
-        file_content = response["Body"].read()
-        return file_content
-    
+        # response = s3_client.get_object(Bucket=bucket_name, Key=object_key)
+        
+        # file_content = response["Body"].read()
+        # return file_content
+        
+        # Get the dataset content from the presigned url
+        return pd.read_csv(presigned_url)#.to_csv(index=False).encode('utf-8')
     def create(self):
         pass
 
@@ -75,15 +82,15 @@ class ModelCreation():
 
 class ModelBasicCreation(ModelCreation):
     required_params = [
-        'modelName', 'problemType', 'datasetFilename', 'columnsDataType',
+        'modelName', 'problemType', 'datasetURL', 'columnsDataType',
         'target', 'preset', 'evalMetric', 'timeLimit'
     ]
 
     def create(self):
         # Load dataset from s3 object store
-        dataset_content = self.get_dataset_from_s3(self.datasetFilename)
-        # dataset = pd.read_csv(pd.compat.StringIO(dataset_content.decode('utf-8')))
-        dataset = pd.read_csv(StringIO(dataset_content.decode('utf-8')))
+        # dataset_content = self.get_dataset_from_s3(self.datasetFilename)
+        # dataset = pd.read_csv(StringIO(dataset_content.decode('utf-8')))
+        dataset = self.get_dataset_from_s3(self.datasetURL)
         # Old code to read dataset from http query body, keep for reference
         # dataset = pd.DataFrame.from_dict(self.datasetJSON)
         dataset = dataset.astype(self.columnsDataType)
@@ -102,7 +109,7 @@ class ModelBasicCreation(ModelCreation):
             path=os.environ.get("AUTOGLUON_MODEL_DIR", "autogluon_models")
         )
 
-        with mlflow.start_run():
+        with mlflow.start_run(run_id=self.run_id):
 
             x_train_mlflow = mlflow.data.from_pandas(x_train)
             x_test_mlflow = mlflow.data.from_pandas(x_test)
@@ -161,7 +168,7 @@ class ModelBasicCreation(ModelCreation):
 
 class ModelAdvancedCreation(ModelCreation):
     required_params = [
-        'modelName', 'problemType', 'datasetFilename', 'columnsDataType',
+        'modelName', 'problemType', 'datasetURL', 'columnsDataType',
         'target', 'strategy', 'algorithm', 'implementation'
     ]
     dimensionality_reduction_methods = ['pca', 'selectkbest']
@@ -193,9 +200,10 @@ class ModelAdvancedCreation(ModelCreation):
         preprocessing_methods = self.preprocessingMethods
         parameters_value = self.parametersValue
         # Load dataset from s3 object store
-        dataset_content = self.get_dataset_from_s3(self.datasetFilename)
+        # dataset_content = self.get_dataset_from_s3(self.datasetURL)
+        dataset = self.get_dataset_from_s3(self.datasetURL)
         # dataset = pd.read_csv(pd.compat.StringIO(dataset_content.decode('utf-8')))
-        dataset = pd.read_csv(StringIO(dataset_content.decode('utf-8')))
+        # dataset = pd.read_csv(StringIO(dataset_content.decode('utf-8')))
         # Old code to read dataset from http query body, keep for reference
         # dataset = pd.DataFrame.from_dict(self.datasetJSON)
         dataset = dataset.astype(self.columnsDataType)
@@ -261,7 +269,7 @@ class ModelAdvancedCreation(ModelCreation):
         if strategy_class is None:
             raise ValidationError(message="Invalid strategy", status_code=409)
         
-        with mlflow.start_run():
+        with mlflow.start_run(run_id=self.run_id):
 
             x_train_mlflow = mlflow.data.from_pandas(x_train)
             x_test_mlflow = mlflow.data.from_pandas(x_test)

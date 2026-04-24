@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: localstack
-        image: localstack/localstack:latest
+        image: localstack/localstack:4.14
         ports:
         - containerPort: {{ .Values.backend.s3_service_port }}
           name: gateway
@@ -36,5 +36,5 @@ spec:
           defaultMode: 0777 # Ensures the init script is executable
       - name: data
         persistentVolumeClaim:
-          claimName: localstack-pvc
+          claimName: localstack-pvc-laredo
 {{- end }}
