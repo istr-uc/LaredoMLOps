@@ -1,0 +1,13 @@
+{{- if .Values.backend.deploy_postgres }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-init
+  namespace: {{ .Values.frontend.namespace}}
+data:
+  init-postgres-db.sh: |
+    #!/bin/bash
+    echo "Initializing PostgreSQL database..."
+    psql -U "$POSTGRES_USER" -tc "SELECT 1 FROM pg_database WHERE datname = '$POSTGRES_DB'" | grep -q 1 || \
+    psql -U "$POSTGRES_USER" -c "CREATE DATABASE $POSTGRES_DB"
+{{- end }}

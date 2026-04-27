@@ -49,7 +49,7 @@ backend:
   s3_storage_size: 10Gi
   s3_service_port: 4566
 
-  deploy_postgres: false
+  deploy_postgres: true
   postgres_admin_password: "admin123" # Handle using secrets
   postgres_service_port: 5432
   postgres_storage_size: 10Gi
