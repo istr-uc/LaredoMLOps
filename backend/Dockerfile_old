@@ -34,5 +34,5 @@ EXPOSE 5050
 COPY --from=builder /project /project
 
 WORKDIR /project
-# Run the backend service
+
 ENTRYPOINT source /project/.venv/bin/activate && export PYTHONPATH=/project && /project/.venv/bin/gunicorn -w 4 src.wsgi:app -b 0.0.0.0:5050 -t 0

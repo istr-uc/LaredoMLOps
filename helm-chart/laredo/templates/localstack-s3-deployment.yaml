@@ -1,0 +1,40 @@
+{{- if .Values.backend.deploy_s3_storage }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: localstack
+  namespace: {{ .Values.frontend.namespace}}
+spec:
+  selector:
+    matchLabels:
+      app: localstack
+  template:
+    metadata:
+      labels:
+        app: localstack
+    spec:
+      containers:
+      - name: localstack
+        image: localstack/localstack:4.14
+        ports:
+        - containerPort: {{ .Values.backend.s3_service_port }}
+          name: gateway
+        env:
+        - name: SERVICES
+          value: "s3" # Restricts LocalStack to ONLY run S3, saving massive amounts of RAM
+        - name: PERSISTENCE
+          value: "1" # Tells LocalStack to persist data to disk, so it survives pod restarts
+        volumeMounts:
+        - name: init-scripts
+          mountPath: /etc/localstack/init/ready.d
+        - name: data
+          mountPath: /var/lib/localstack
+      volumes:
+      - name: init-scripts
+        configMap:
+          name: localstack-init
+          defaultMode: 0777 # Ensures the init script is executable
+      - name: data
+        persistentVolumeClaim:
+          claimName: localstack-pvc-laredo
+{{- end }}

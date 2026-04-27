@@ -266,6 +266,43 @@
           "default": 3
         }
       }
+    },
+    "multilayer_perceptron" : {
+      "implementation" : "pytorch",
+      "strategy" : "SimpleNeuralNetworkClassifierTorchStrategy",
+      "parameters" : {
+        "num_layers": {
+          "description": "Number of layers in the neural network.",
+          "type": "integer",
+          "default": 3
+        },
+        "hidden_size": {
+          "description": "Number of neurons in each hidden layer.",
+          "type": "integer",
+          "default": 3
+        }
+      }
+    },
+    "rnn" : {
+      "implementation" : "pytorch",
+      "strategy" : "RNNClassifierTorchStrategy",
+      "parameters" : {
+        "num_layers": {
+          "description": "Number of layers in the neural network.",
+          "type": "integer",
+          "default": 3
+        },
+        "hidden_size": {
+          "description": "Number of neurons in each hidden layer.",
+          "type": "integer",
+          "default": 3
+        },
+        "sequence_lenght": {
+          "description": "Length of the sequences of events fed into the RNN.",
+          "type": "integer",
+          "default": 3
+        }
+      }
     }
   },
   "regressor" : {
@@ -492,6 +529,43 @@
       "parameters" : {
         "n_neighbors": {
           "description": "Number of neighbors to use.",
+          "type": "integer",
+          "default": 3
+        }
+      }
+    },
+    "multilayer_perceptron" : {
+      "implementation" : "pytorch",
+      "strategy" : "SimpleNeuralNetworkRegressorTorchStrategy",
+      "parameters" : {
+        "num_layers": {
+          "description": "Number of layers in the neural network.",
+          "type": "integer",
+          "default": 3
+        },
+        "hidden_size": {
+          "description": "Number of neurons in each hidden layer.",
+          "type": "integer",
+          "default": 3
+        }
+      }
+    },
+    "rnn" : {
+      "implementation" : "pytorch",
+      "strategy" : "RNNRegressorTorchStrategy",
+      "parameters" : {
+        "num_layers": {
+          "description": "Number of layers in the neural network.",
+          "type": "integer",
+          "default": 3
+        },
+        "hidden_size": {
+          "description": "Number of neurons in each hidden layer.",
+          "type": "integer",
+          "default": 3
+        },
+        "sequence_lenght": {
+          "description": "Length of the sequences of events fed into the RNN.",
           "type": "integer",
           "default": 3
         }

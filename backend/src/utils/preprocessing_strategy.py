@@ -4,6 +4,7 @@ from sklearn.decomposition import PCA
 from sklearn.preprocessing import MinMaxScaler, Normalizer, StandardScaler, OneHotEncoder
 from sklearn.feature_selection import SelectKBest
 from sklearn.impute import SimpleImputer
+from src.utils.preprocessing_data_classes import *
 
 class PreprocessingStrategy:
     def get_step(self, params):
@@ -11,6 +12,7 @@ class PreprocessingStrategy:
 
 class DropStrategy(PreprocessingStrategy):
     def get_step(self, params):
+        params = DropParams(**params).model_dump()
         preprocessor = ColumnTransformer(
             remainder='passthrough',
             transformers=[('drop_col','drop',params['dropColumns'])]
@@ -19,6 +21,7 @@ class DropStrategy(PreprocessingStrategy):
 
 class MinMaxScalerStrategy(PreprocessingStrategy):
     def get_step(self, params):
+        params = MinMaxScalerParams(**params).model_dump()
         scaler = MinMaxScaler(feature_range=(params['min'], params['max']))
         return ("MinMaxScaler", scaler)
     
@@ -43,16 +46,19 @@ class OneHotEncoderStrategy(PreprocessingStrategy):
 
 class SelectKBestStrategy(PreprocessingStrategy):
     def get_step(self, params):
+        params = SelectKBestParams(**params).model_dump()
         selector = SelectKBest(**params)
         return ("SelectKBest", selector)
 
 class PCAStrategy(PreprocessingStrategy):
     def get_step(self, params):
+        params = PCAParams(**params).model_dump()
         pca = PCA(**params)
         return ("PCA", pca)
     
 class SimpleImputerStrategy(PreprocessingStrategy):
     def get_step(self, params):
+        params = SimpleImputerParams(**params).model_dump()
         imputer = SimpleImputer(**params)
         return ("SimpleImputer", imputer)
     
@@ -66,4 +72,5 @@ class BfillStrategy(PreprocessingStrategy):
 
 class TabularToWindowStrategy(PreprocessingStrategy):
     def get_step(self, params):
+        params = TabularToWindowStrategyParams(**params).model_dump()
         return ("TabularToWindow", TabularToWindowTransformer(**params))

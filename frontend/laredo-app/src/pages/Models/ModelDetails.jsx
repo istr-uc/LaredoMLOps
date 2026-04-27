@@ -4,6 +4,7 @@ import CustomButton from '@components/CustomButton'
 import CustomModal from '@components/CustomModal'
 import checkIcon from '@assets/images/checkIcon.svg'
 import errorIcon from '@assets/images/cancelIcon.svg'
+import PipelineIframe from '@components/PipelineFrame.jsx'
 
 
 import axios from 'axios'
@@ -32,9 +33,20 @@ function ModelDetails() {
 
             const response = await axios.get(apiUrl)
 
+            // console.log('estimator response:', response.data.estimator)
+            let dataset = null;
+            if (response.data.dataset) {
+                try {
+                    dataset = JSON.parse(response.data.dataset);
+                } catch {
+                    dataset = null; // fallback if invalid JSON
+                }
+            }
+            
             setMetrics(response.data.metrics)
-            setDataset(JSON.parse(response.data.dataset))
             setPipeline(response.data.estimator)
+            // setDataset(JSON.parse((response.data.dataset === '' || response.data.dataset === null) ? 'null': response.data.dataset))
+            setDataset(dataset)
             setIsDeployed(response.data.is_deployed)
         } catch (error) {
             console.error('Error fetching data:', error)
@@ -118,7 +130,11 @@ function ModelDetails() {
                 <h1 className='text-7xl font-bold text-center mt-12'>Model Details</h1>
                 <h2 className='text-5xl font-bold text-center mt-1'>{modelName}</h2>
 
-                <div className='mt-12' dangerouslySetInnerHTML={{ __html: pipeline }} />
+                {/* <div className='mt-12' dangerouslySetInnerHTML={{ __html: pipeline }} /> */}
+                {/* <div className='mt-12'>
+                <iframe srcDoc={pipeline} className="w-full h-[700px] border rounded"  sandbox="allow-scripts"  title="ML Pipeline"/>
+                </div> */}
+                <PipelineIframe pipelineHtml={pipeline} maxHeight={800} />
 
                 <div className='flex items-center mt-12 w-full'>
                     <div className='flex flex-col items-center w-1/2'>
@@ -154,7 +170,8 @@ function ModelDetails() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {dataset && dataset.mlflow_colspec.map((col, index) => (
+                                    {/* {dataset && dataset.mlflow_colspec.map((col, index) => ( */}
+                                    {(dataset?.mlflow_colspec ?? []).map((col, index) => (
                                         <tr key={index}>
                                             <td className='font-bold px-9 py-5 border-8 border-slate-950'>{col.name}</td>
                                             <td className='px-9 py-5 border-8 border-slate-950'>{col.type}</td>

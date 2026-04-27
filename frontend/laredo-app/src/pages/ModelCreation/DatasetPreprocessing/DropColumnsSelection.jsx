@@ -18,7 +18,7 @@ function DropColumnsSelection({columns, selectedMethods, setSelectedMethods, dro
             setSelectedMethods(newSelectedMethods)
         }
 
-
+        
         setColumnsDropSelected(true)
     }
 

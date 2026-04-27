@@ -5,11 +5,10 @@ backend:
   replicaCount: 1
   namespace: laredo
   image:
-    repository: ghcr.io/dintenr/laredo-backend
-    # repository: laredo/backend
+    repository: ghcr.io/istr-uc/LaredoMLOps-backend
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: 0.0.2
+    tag: 1.1.0
 
   imagePullSecrets: []
   nameOverride: ""
@@ -45,18 +44,42 @@ backend:
     type: ClusterIP
     port: 5050
     
+  deploy_s3_storage: true
+  s3_storage_size: 10Gi
+  s3_service_port: 4566
+
+  deploy_postgres: true
+  postgres_admin_password: "admin123" # Handle using secrets
+  postgres_service_port: 5432
+  postgres_storage_size: 10Gi
+
   deploy_mlflow: true
   mlflow_tracking_uri_ip: mlflow-service
   mlflow_tracking_uri_port: '5000'
+  mlflow_externalStorage: true
+  mlflow_artifact_uri: "s3://mlflow-artifacts/artifacts"
+  postgres_db_name: "mlflow"
+  postgres_user: "postgres"
+  postgres_password: "admin123"
+  postgres_host: "postgres"
+  postgres_port: 5432
+  MLFLOW_S3_ENDPOINT_URL: http://localstack-service:4566
+  DEFAULT_ARTIFACT_ROOT: "mlflow-artifacts:/artifacts"
+  AWS_ACCESS_KEY_ID: "test"
+  AWS_SECRET_ACCESS_KEY: "test"
+  AWS_DEFAULT_REGION: "us-east-1"
+  DATASET_BUCKET_NAME: "ml-datasets"
+  TRAINER_IMAGE: "laredo/trainer"
+  TRAINER_TAG: "0.1.0"
+
 frontend:
   replicaCount: 1
   namespace: laredo
   image:
-    repository: ghcr.io/dintenr/laredo-frontend
-    # repository: laredo/frontend
+    repository: ghcr.io/istr-uc/LaredoMLOps-frontend
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: 0.1.0
+    tag: 1.1.0
 
   imagePullSecrets: []
   nameOverride: ""
@@ -95,8 +118,7 @@ chatbotBackend:
   replicaCount: 1
   namespace: laredo
   image:
-    repository: ghcr.io/dintenr/laredo-chatbot-backend
-    # repository: laredo/chatbot-backend
+    repository: ghcr.io/istr-uc/LaredoMLOps-chatbot
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
     tag: 0.1.0
@@ -135,6 +157,12 @@ chatbotBackend:
     LANGSMITH_API_KEY: "your-langsmith-api-key"
     LANGSMITH_TRACING_V2: "true"
     LANGSMITH_PROJECT: "chatbot"
+    
+  llm_models:
+    MAIN_LLM_MODEL: "gemma-3-27b-it"
+    
+    LLM_TRANSLATION_SUMMARIZATION_MODEL: "gemma-3-27b-it"
+    
 
 ingress:
   enabled: false

@@ -36,7 +36,7 @@ class CoreInitializer:
         """
         try:
             # Initializing KeyManager, ModelManager, DocumentManager, and EmbeddingManager
-            KeyManager()
+            KeyManager(env_file="environment/.env")
             self._model_manager = ModelManager()
             self._document_manager = DocumentManager(
                 directory_path=self._docs_path, web_paths=self._web_paths
