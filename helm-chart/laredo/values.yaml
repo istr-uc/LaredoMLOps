@@ -5,8 +5,7 @@ backend:
   replicaCount: 1
   namespace: laredo
   image:
-    # repository: ghcr.io/dintenr/laredo-backend
-    repository: laredo/backend
+    repository: ghcr.io/istr-uc/LaredoMLOps-backend
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
     tag: 1.1.0
@@ -77,8 +76,7 @@ frontend:
   replicaCount: 1
   namespace: laredo
   image:
-    # repository: ghcr.io/dintenr/laredo-frontend
-    repository: laredo/frontend
+    repository: ghcr.io/istr-uc/LaredoMLOps-frontend
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
     tag: 1.1.0
@@ -120,8 +118,7 @@ chatbotBackend:
   replicaCount: 1
   namespace: laredo
   image:
-    repository: ghcr.io/dintenr/laredo-chatbot-backend
-    # repository: laredo/chatbot-backend
+    repository: ghcr.io/istr-uc/LaredoMLOps-chatbot
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
     tag: 0.1.0
