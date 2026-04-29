@@ -92,7 +92,8 @@ def train_model():
     params = data.get("params", {})
     # Get dataset name from params, if not present, return error
     dataset_name = params.pop("datasetFilename")
-    params["datasetURL"] = get_s3_signed_url(dataset_name, method="get_object")
+    endpoint_url = os.getenv("S3_INTERNAL_ENDPOINT_URL") if os.getenv("S3_INTERNAL_ENDPOINT_URL") else os.getenv("S3_ENDPOINT_URL")
+    params["datasetURL"] = get_s3_signed_url(dataset_name, method="get_object", endpoint_url=endpoint_url)
     # Create mlflow run and get run id
     with mlflow.start_run() as run:
         run_id = run.info.run_id
@@ -185,10 +186,10 @@ def get_run_metrics(run_id):
     run = mlflow.get_run(run_id)
     return run.data.metrics
 
-def get_s3_signed_url(dataset_name,method="get_object"):
+def get_s3_signed_url(dataset_name,method="get_object",endpoint_url=None):
     s3_client = boto3.client(
         "s3",
-        endpoint_url=os.getenv("S3_ENDPOINT_URL"),
+        endpoint_url=endpoint_url or os.getenv("S3_ENDPOINT_URL"),
         aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
         aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY")
     )

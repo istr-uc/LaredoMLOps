@@ -5,7 +5,8 @@ backend:
   replicaCount: 1
   namespace: laredo
   image:
-    repository: ghcr.io/istr-uc/LaredoMLOps-backend
+    # repository: ghcr.io/istr-uc/LaredoMLOps-backend
+    repository: laredo/backend
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
     tag: 1.1.0
@@ -63,8 +64,8 @@ backend:
   postgres_password: "admin123"
   postgres_host: "postgres"
   postgres_port: 5432
-  MLFLOW_S3_ENDPOINT_URL: http://localstack-service:4566
-  DEFAULT_ARTIFACT_ROOT: "mlflow-artifacts:/artifacts"
+  S3_INTERNAL_ENDPOINT_URL: http://localstack-service:4566
+  MLFLOW_S3_ENDPOINT_URL: http://localstack.127.0.0.1.nip.io
   AWS_ACCESS_KEY_ID: "test"
   AWS_SECRET_ACCESS_KEY: "test"
   AWS_DEFAULT_REGION: "us-east-1"
@@ -76,7 +77,8 @@ frontend:
   replicaCount: 1
   namespace: laredo
   image:
-    repository: ghcr.io/istr-uc/LaredoMLOps-frontend
+    # repository: ghcr.io/istr-uc/LaredoMLOps-frontend
+    repository: laredo/frontend
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
     tag: 1.1.0
@@ -111,6 +113,7 @@ frontend:
     # runAsUser: 1000
 
   service:
+    name: laredo-frontend
     type: ClusterIP
     port: 80
 
@@ -118,7 +121,8 @@ chatbotBackend:
   replicaCount: 1
   namespace: laredo
   image:
-    repository: ghcr.io/istr-uc/LaredoMLOps-chatbot
+    # repository: ghcr.io/istr-uc/LaredoMLOps-chatbot
+    repository: ghcr.io/dintenr/laredo-chatbot-backend
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
     tag: 0.1.0
@@ -165,20 +169,34 @@ chatbotBackend:
     
 
 ingress:
-  enabled: false
-  className: ""
-  annotations: {}
-    # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
+  enabled: true
+  className: "nginx"
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "PUT"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
   hosts:
-    - host: chart-example.local
+    - host: localstack.127.0.0.1.nip.io
+      paths:
+        - path: /localstack
+          pathType: ImplementationSpecific
+    - host: mlflow.127.0.0.1.nip.io
+      paths:
+        - path: /mlflow
+          pathType: ImplementationSpecific
+    - host: app.127.0.0.1.nip.io
       paths:
         - path: /
           pathType: ImplementationSpecific
   tls: []
-  #  - secretName: chart-example-tls
-  #    hosts:
-  #      - chart-example.local
+  # tls:
+  #   - secretName: example-tls
+  #     hosts:
+  #       - localstack.127.0.0.1.nip.io
+  #       - mlflow.127.0.0.1.nip.io
+  #       - app.127.0.0.1.nip.io
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious

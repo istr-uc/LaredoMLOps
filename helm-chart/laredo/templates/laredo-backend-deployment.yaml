@@ -29,6 +29,10 @@ spec:
         {{- if and .Values.backend.AWS_ACCESS_KEY_ID .Values.backend.AWS_SECRET_ACCESS_KEY }}
         - name: S3_ENDPOINT_URL
           value: {{ quote .Values.backend.MLFLOW_S3_ENDPOINT_URL }}
+        {{- if .Values.backend.deploy_s3_storage }}
+        - name: S3_INTERNAL_ENDPOINT_URL
+          value: {{ quote .Values.backend.S3_INTERNAL_ENDPOINT_URL }}
+        {{- end }}
         - name: DATASET_BUCKET_NAME
           value: {{ quote .Values.backend.DATASET_BUCKET_NAME }}
         - name: TRAINER_IMAGE
