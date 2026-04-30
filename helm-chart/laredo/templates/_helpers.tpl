@@ -60,3 +60,27 @@ Create the name of the service account to use
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+{{/*
+Gateway API Helpers
+*/}}
+
+{{/*
+Generate HTTPRoute match rules for a given hostname and paths.
+Args: .hostname, .paths (array of {path: string, pathPrefix: bool})
+*/}}
+{{- define "laredo.httproute.matches" -}}
+{{- range .paths }}
+- hostname: {{ .hostname | quote }}
+  path:
+    type: {{ if .pathPrefix }}PathPrefix{{ else }}Exact{{ end }}
+    value: {{ .path | quote }}
+{{- end }}
+{{- end }}
+
+{{/*
+Check if Gateway API is enabled
+*/}}
+{{- define "laredo.gatewayAPIEnabled" -}}
+{{- if .Values.gatewayAPI.enabled }}true{{ else }}false{{ end }}
+{{- end }}

@@ -29,7 +29,8 @@ spec:
         - name: MLFLOW_ARTIFACTS_DESTINATION
           value: {{ quote .Values.backend.mlflow_artifact_uri }}
         - name: MLFLOW_S3_ENDPOINT_URL
-          value: {{ quote .Values.backend.MLFLOW_S3_ENDPOINT_URL }}
+          # value: {{ quote .Values.backend.MLFLOW_S3_ENDPOINT_URL }}
+          value: {{ quote .Values.backend.S3_INTERNAL_ENDPOINT_URL }}
         {{- if and .Values.backend.AWS_ACCESS_KEY_ID .Values.backend.AWS_SECRET_ACCESS_KEY }}
         - name: AWS_ACCESS_KEY_ID
           valueFrom:

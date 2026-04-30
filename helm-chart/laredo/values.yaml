@@ -169,7 +169,7 @@ chatbotBackend:
     
 
 ingress:
-  enabled: true
+  enabled: false
   className: "nginx"
   annotations:
     kubernetes.io/ingress.class: nginx
@@ -197,6 +197,68 @@ ingress:
   #       - localstack.127.0.0.1.nip.io
   #       - mlflow.127.0.0.1.nip.io
   #       - app.127.0.0.1.nip.io
+
+# Gateway API Configuration (Kubernetes standard networking.gateway.k8s.io)
+gatewayAPI:
+  enabled: true
+  # GatewayClass name - should be created by NGINX Gateway Controller
+  gatewayClassName: "nginx"
+   # NGINX Gateway controller settings
+  controller:
+    env:
+      - name: CLIENT_MAX_BODY_SIZE
+        value: "0"
+  # Gateway configuration
+  gateway:
+    name: laredo-gateway
+    # Listeners define ports and protocols the gateway listens on
+    listeners:
+      - name: http
+        port: 80
+        protocol: HTTP
+  # HTTPRoute host configurations
+  hosts:
+    localstack:
+      enabled: true
+      host: localstack.127.0.0.1.nip.io
+      paths:
+        - path: /
+          pathPrefix: true
+      service: localstack-service
+      port: 4566
+    mlflow:
+      enabled: true
+      host: mlflow.127.0.0.1.nip.io
+      paths:
+        - path: /
+          pathPrefix: true
+      service: mlflow-service
+      port: 5000
+    frontend:
+      enabled: true
+      host: app.127.0.0.1.nip.io
+      paths:
+        - path: /
+          pathPrefix: true
+      service: laredo-frontend
+      port: 80
+  # NGINX-specific configuration for proxy settings and CORS
+  corsPolicy:
+    enabled: true
+    allowMethods:
+      - GET
+      - PUT
+      - POST
+      - DELETE
+      - OPTIONS
+    allowHeaders:
+      - "Content-Type"
+      - "Authorization"
+      - "x-amz-*"
+    allowOrigin: "*"
+    exposeHeaders:
+      - "ETag"
+      - "x-amz-version-id"
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
