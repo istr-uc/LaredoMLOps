@@ -52,6 +52,80 @@ You can set up and run the backend using either the quick script option or by fo
 5. **Verify the backend is running:**
    Open your browser and go to [http://localhost:20000/hello](http://localhost:20000/hello). If everything is working, you will see a greeting message. Change 20000 to the port you selected. (20000 by default)
 
+## Docker Deployment with Pre-initialized Database
+
+To significantly speed up container startup times, you can pre-initialize the Chroma database locally before building the Docker image.
+
+### Why Pre-initialize?
+- **Faster container startup**: Eliminates expensive document loading and embedding generation during container startup
+- **Consistent deployments**: Ensures the same database is used across all deployed containers
+- **Reduced resource usage**: Container startup doesn't require embedding model overhead
+
+### Pre-initialization Workflow
+
+1. **Ensure your environment is ready:**
+   - Update documentation files in the `docs/` directory
+   - Verify Ollama service is running (for embeddings)
+   - Activate your Python environment with project dependencies installed
+
+2. **Run the pre-initialization script:**
+   ```bash
+   cd ../scripts
+   python init_chroma_db.py
+   ```
+   
+   This script will:
+   - Load all `.md` files from `../backend/docs/`
+   - Generate embeddings using Ollama
+   - Create the Chroma database at `../backend/database/`
+   
+   **Note:** The embedding generation can take several minutes depending on document size.
+
+3. **Build the Docker image with the pre-initialized database:**
+   ```bash
+   # From the backend directory
+   docker build -t chatbot-backend:latest .
+   ```
+   
+   The Dockerfile will automatically copy the `database/` directory into the image.
+
+4. **Run the container:**
+   ```bash
+   docker run -p 20000:20000 chatbot-backend:latest
+   ```
+   
+   The database will be ready immediately on startup (no initialization delay).
+
+### Advanced: Running Without Pre-initialized Database
+
+If you want the container to initialize the database at runtime (useful for development):
+
+```bash
+# Build and run with environment variable to skip pre-init
+docker run -p 20000:20000 -e SKIP_DB_INIT=false chatbot-backend:latest
+```
+
+The container will detect the missing database and initialize it from scratch (this will take longer).
+
+### Database Rebuilding
+
+If your documentation changes and you need to rebuild the database:
+
+```bash
+# Remove the old database
+rm -r database/
+
+# Re-run the pre-initialization script
+cd ../scripts
+python init_chroma_db.py
+
+# Rebuild the Docker image
+cd ../backend
+docker build -t chatbot-backend:latest .
+```
+
+**For detailed pre-initialization instructions**, see [`../scripts/README.md`](../scripts/README.md).
+
 ## Project Structure
 
 ```
@@ -148,9 +222,10 @@ Project documentation (this file).
 ### Common Issues
 - **PYTHONPATH Issues**: If you encounter import errors, run `init.bat` to set the correct PYTHONPATH for Windows.
 - **Dependency Problems**: Ensure all dependencies are installed with `poetry install` and that your virtual environment is activated.
-- **Database Errors**: Confirm that the `database/` folder is writable and that the Chroma database files are not corrupted. If the app behaves unexpectedly, try deleting the contents of the `database/` folder before restarting the backend.
+- **Database Errors**: Confirm that the `database/` folder is writable and that the Chroma database files are not corrupted. If the app behaves unexpectedly, try deleting the contents of the `database/` folder before restarting the backend. If deploying with Docker, ensure you've run the pre-initialization script (`python ../scripts/init_chroma_db.py`) before building the image.
 - **API Not Responding**: Make sure the backend is running (`python src/wsgi.py`) and check for errors in the terminal.
 - **Port Conflicts**: If the server fails to start, verify that the default port is not in use by another process.
+- **Slow Container Startup**: If the container takes a long time to start, it may be initializing the database. Use pre-initialization (see "Docker Deployment" section above) to speed it up.
 
 ### Verifying the Backend
 - To verify the backend is running correctly, open your browser and go to `http://localhost:YOUR_PORT/hello`. If everything is working, you should see a hello message.

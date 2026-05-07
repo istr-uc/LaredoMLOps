@@ -44,14 +44,22 @@ RUN groupadd -r appuser && useradd -r -g appuser appuser
 COPY --from=builder /project/.venv /project/.venv
 COPY --from=builder /project/src /project/src
 COPY --from=builder /project/docs /project/docs
-# Create database directory
-RUN mkdir /project/database
+
+# Copy pre-initialized Chroma database (if available from build context)
+# NOTE: The database/ directory should be copied from the host before building the image
+# Run the init_chroma_db.py script on your local machine, then:
+# COPY database/ /project/database/
+# Comment out the RUN mkdir line below if you COPY a pre-initialized database
+# COPY database/ /project/database/ 2>/dev/null || true
+COPY database/ /project/database/ 
+# RUN mkdir -p /project/database
 
 # Set environment variables
 # Adding .venv/bin to PATH removes the need to "source" the venv
 ENV PATH="/project/.venv/bin:$PATH" \
     PYTHONUNBUFFERED=1 \
-    PYTHONPATH="/project"
+    PYTHONPATH="/project" \
+    SKIP_DB_INIT=true
 
 EXPOSE 20000
 

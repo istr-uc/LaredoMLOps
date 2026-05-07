@@ -8,6 +8,7 @@ This module defines the ChatbotService class, which manages the setup of core ch
 """
 
 from typing import AsyncGenerator, List, Any, Dict
+import os
 
 from src.chatbot.core_initializer import CoreInitializer
 from src.config.config_url import DOCS_URL
@@ -33,8 +34,12 @@ class ChatbotService:
 
         This method sets up the core components (LLM, embeddings, etc.), retrieves the initialized managers, builds the chatbot graph, and configures the chatbot conversation.
         """
+        # Read environment variable to determine if we should skip DB initialization
+        # Set to true in Docker when using pre-initialized database
+        skip_db_init = os.getenv("SKIP_DB_INIT", "false").lower() in ("true", "1", "yes")
+
         # Initialize core components (LLM, embeddings, etc.)
-        core = CoreInitializer(docs_path=docs_path, web_paths=web_paths)
+        core = CoreInitializer(docs_path=docs_path, web_paths=web_paths, skip_db_init=skip_db_init)
         core.initialize()
 
         # Retrieve initialized managers

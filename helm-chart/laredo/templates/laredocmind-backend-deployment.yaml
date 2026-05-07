@@ -21,6 +21,8 @@ spec:
         env:
         - name: MAIN_LLM_MODEL
           value: {{ .Values.chatbotBackend.llm_models.MAIN_LLM_MODEL }}
+        - name: EMBEDDINGS_MODEL
+          value: {{ .Values.chatbotBackend.llm_models.EMBEDDINGS_MODEL }}
         - name: TRANSLATION_SUMMARIZATION_LLM_MODEL
           value: {{ .Values.chatbotBackend.llm_models.LLM_TRANSLATION_SUMMARIZATION_MODEL }}
         volumeMounts:

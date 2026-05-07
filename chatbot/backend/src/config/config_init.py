@@ -84,7 +84,7 @@ LLM_TRANSLATION_SUMMARIZATION_CONFIG = {
 # -------------------------
 
 EMBEDDINGS_CONFIG: Dict[str, Any] = {
-    "model": "models/text-embedding-004",  # Name of the embeddings model
+    "model": os.getenv("EMBEDDINGS_MODEL", "models/gemini-embedding-001"),  # Name of the embeddings model
     "task_type": "retrieval_document",  # Set if needed for a specific task
     "client_options": None,  # Advanced client configuration
     "transport": None,  # Custom transport method

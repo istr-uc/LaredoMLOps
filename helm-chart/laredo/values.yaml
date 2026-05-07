@@ -164,7 +164,7 @@ chatbotBackend:
     
   llm_models:
     MAIN_LLM_MODEL: "gemma-3-27b-it"
-    
+    EMBEDDINGS_MODEL: "gemini-embedding-001"
     LLM_TRANSLATION_SUMMARIZATION_MODEL: "gemma-3-27b-it"
     
 
