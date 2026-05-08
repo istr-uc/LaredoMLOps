@@ -67,7 +67,7 @@ try {
     
     Write-Host "✅ Port forwarding started in the background (mapping localhost:80 -> laredo-frontend)." -ForegroundColor Green
     Write-Host "`n✨ LaredoMLOps is ready for your usability test!" -ForegroundColor White -BackgroundColor DarkGreen
-    Write-Host "🔗 Access the application at: http://localhost:80" -ForegroundColor White
+    Write-Host "🔗 Access the application at: http://app.127.0.0.1.nip.io:80" -ForegroundColor White
     Write-Host "`n(To stop the script and port-forwarding, close this terminal or kill the kubectl process.)" -ForegroundColor Gray
 
 } catch {

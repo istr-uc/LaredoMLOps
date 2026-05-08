@@ -1,14 +1,14 @@
-name: Build and push Docker image for chatbot
+name: Build and push Docker images for chatbot
 on:
   push:
     branches:
       - main
     paths:
-      - 'chatbot/**'  # Trigger only if files in the 'chatbot' directory are changed
+      - 'chatbot/**'
 env:
   REGISTRY: ghcr.io
 jobs:
-  build-and-push-image:
+  build-and-push-images:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -29,15 +29,32 @@ jobs:
         id: version
         run: echo "VERSION=$(cat chatbot/VERSION)" >> $GITHUB_OUTPUT
 
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta
+      - name: Extract metadata (tags, labels) for Chatbot
+        id: meta-chatbot
         uses: docker/metadata-action@v4
         with:
           images: ${{ env.REGISTRY }}/istr-uc/LaredoMLOps-chatbot:${{ steps.version.outputs.VERSION }}
-      - name: Build and push Docker image
+
+      - name: Extract metadata (tags, labels) for Ollama
+        id: meta-ollama
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.REGISTRY }}/istr-uc/LaredoMLOps-ollama:${{ steps.version.outputs.VERSION }}
+
+      - name: Build and push Chatbot image
         uses: docker/build-push-action@v4
         with:
-          context: ./chatbot/backend
+          context: .
+          file: chatbot/backend/Dockerfile
           push: true
-          tags: ${{ env.REGISTRY }}/istr-uc/LaredoMLOps-chatbot:${{ steps.version.outputs.VERSION }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: ${{ steps.meta-chatbot.outputs.tags }}
+          labels: ${{ steps.meta-chatbot.outputs.labels }}
+
+      - name: Build and push Ollama service image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: chatbot/backend/Dockerfile.ollama
+          push: true
+          tags: ${{ steps.meta-ollama.outputs.tags }}
+          labels: ${{ steps.meta-ollama.outputs.labels }}

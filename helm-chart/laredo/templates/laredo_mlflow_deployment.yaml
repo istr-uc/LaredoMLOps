@@ -16,8 +16,8 @@ spec:
     spec:
       containers:
       - name: mlflow
-        # image: ghcr.io/dintenr/mlflow-istr:0.0.1
-        image: mlflow-laredo:0.0.2
+        image: ghcr.io/dintenr/mlflow-istr:0.0.1
+        # image: mlflow-laredo:0.0.2
         ports:
         - containerPort: 5000
         {{- if .Values.backend.mlflow_externalStorage }}

@@ -5,11 +5,10 @@ backend:
   replicaCount: 1
   namespace: laredo
   image:
-    # repository: ghcr.io/istr-uc/LaredoMLOps-backend
-    repository: laredo/backend
+    repository: ghcr.io/istr-uc/LaredoMLOps-backend
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: 1.1.0
+    tag: 1.0.0
 
   imagePullSecrets: []
   nameOverride: ""
@@ -71,17 +70,16 @@ backend:
   AWS_DEFAULT_REGION: "us-east-1"
   DATASET_BUCKET_NAME: "ml-datasets"
   TRAINER_IMAGE: "laredo/trainer"
-  TRAINER_TAG: "0.1.0"
+  TRAINER_TAG: "1.0.0"
 
 frontend:
   replicaCount: 1
   namespace: laredo
   image:
-    # repository: ghcr.io/istr-uc/LaredoMLOps-frontend
-    repository: laredo/frontend
+    repository: ghcr.io/istr-uc/LaredoMLOps-frontend
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: 1.1.0
+    tag: 1.0.0
 
   imagePullSecrets: []
   nameOverride: ""
@@ -121,11 +119,10 @@ chatbotBackend:
   replicaCount: 1
   namespace: laredo
   image:
-    # repository: ghcr.io/istr-uc/LaredoMLOps-chatbot
-    repository: ghcr.io/dintenr/laredo-chatbot-backend
+    repository: ghcr.io/istr-uc/LaredoMLOps-chatbot
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: 0.1.0
+    tag: 1.0.0
 
   imagePullSecrets: []
   nameOverride: ""
