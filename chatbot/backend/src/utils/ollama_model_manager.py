@@ -21,15 +21,15 @@ class ModelManager:
     Class to manage the creation of LLM and embeddings models.
     """
 
-    def __init__(self):
+    def __init__(self, base_url: str = "http://ollama-service:11434") -> None:
         """
         Constructor of the class. Initializes the LLM and embeddings models.
         """
-
+        self._base_url = base_url
         logger.info("Initializing ModelManager...")
 
         # check if the models are already initialized to avoid reinitialization
-        self._llm = self._llm if hasattr(self, "_llm") else self._initialize_llm()
+        # self._llm = self._llm if hasattr(self, "_llm") else self._initialize_llm()
         self._embeddings = (
             self._embeddings
             if hasattr(self, "_embeddings")
@@ -46,7 +46,7 @@ class ModelManager:
             ChatOllama: Instance of the language model.
         """
         logger.info("Initializing LLM model (Ollama)...")
-        return ChatOllama(model="gemma3:4b")
+        return ChatOllama(model="gemma3:4b", base_url=self._base_url)
 
     def _initialize_embeddings(self) -> OllamaEmbeddings:
         """
@@ -56,7 +56,7 @@ class ModelManager:
             OllamaEmbeddings: Instance of the embeddings model.
         """
         logger.info("Initializing embeddings model (Ollama)...")
-        return OllamaEmbeddings(model="nomic-embed-text:latest")
+        return OllamaEmbeddings(model="nomic-embed-text:v1.5", base_url=self._base_url)
 
     # ----------------------------------------------------------------------------------------------
     # Getters and setters

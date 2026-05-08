@@ -1,0 +1,23 @@
+{{- if and (include "laredo.gatewayAPIEnabled" .) .Values.gatewayAPI.hosts.frontend.enabled }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: laredo-frontend-route
+  namespace: {{ .Values.backend.namespace }}
+  labels:
+    {{- include "laredo.labels" . | nindent 4 }}
+spec:
+  parentRefs:
+  - name: {{ .Values.gatewayAPI.gateway.name }}
+    sectionName: http
+  hostnames:
+  - {{ .Values.gatewayAPI.hosts.frontend.host }}
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /
+    backendRefs:
+    - name: {{ .Values.gatewayAPI.hosts.frontend.service }}
+      port: {{ .Values.gatewayAPI.hosts.frontend.port }}
+{{- end }}

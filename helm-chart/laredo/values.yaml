@@ -5,11 +5,10 @@ backend:
   replicaCount: 1
   namespace: laredo
   image:
-    repository: ghcr.io/dintenr/laredo-backend
-    # repository: laredo/backend
+    repository: ghcr.io/istr-uc/LaredoMLOps-backend
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: 0.0.2
+    tag: 1.0.0
 
   imagePullSecrets: []
   nameOverride: ""
@@ -45,18 +44,42 @@ backend:
     type: ClusterIP
     port: 5050
     
+  deploy_s3_storage: true
+  s3_storage_size: 10Gi
+  s3_service_port: 4566
+
+  deploy_postgres: true
+  postgres_admin_password: "admin123" # Handle using secrets
+  postgres_service_port: 5432
+  postgres_storage_size: 10Gi
+
   deploy_mlflow: true
   mlflow_tracking_uri_ip: mlflow-service
   mlflow_tracking_uri_port: '5000'
+  mlflow_externalStorage: true
+  mlflow_artifact_uri: "s3://mlflow-artifacts/artifacts"
+  postgres_db_name: "mlflow"
+  postgres_user: "postgres"
+  postgres_password: "admin123"
+  postgres_host: "postgres"
+  postgres_port: 5432
+  S3_INTERNAL_ENDPOINT_URL: http://localstack-service:4566
+  MLFLOW_S3_ENDPOINT_URL: http://localstack.127.0.0.1.nip.io
+  AWS_ACCESS_KEY_ID: "test"
+  AWS_SECRET_ACCESS_KEY: "test"
+  AWS_DEFAULT_REGION: "us-east-1"
+  DATASET_BUCKET_NAME: "ml-datasets"
+  TRAINER_IMAGE: "laredo/trainer"
+  TRAINER_TAG: "1.0.0"
+
 frontend:
   replicaCount: 1
   namespace: laredo
   image:
-    repository: ghcr.io/dintenr/laredo-frontend
-    # repository: laredo/frontend
+    repository: ghcr.io/istr-uc/LaredoMLOps-frontend
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: 0.1.0
+    tag: 1.0.0
 
   imagePullSecrets: []
   nameOverride: ""
@@ -88,6 +111,7 @@ frontend:
     # runAsUser: 1000
 
   service:
+    name: laredo-frontend
     type: ClusterIP
     port: 80
 
@@ -95,11 +119,10 @@ chatbotBackend:
   replicaCount: 1
   namespace: laredo
   image:
-    repository: ghcr.io/dintenr/laredo-chatbot-backend
-    # repository: laredo/chatbot-backend
+    repository: ghcr.io/istr-uc/LaredoMLOps-chatbot
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: 0.1.0
+    tag: 1.0.0
 
   imagePullSecrets: []
   nameOverride: ""
@@ -135,22 +158,104 @@ chatbotBackend:
     LANGSMITH_API_KEY: "your-langsmith-api-key"
     LANGSMITH_TRACING_V2: "true"
     LANGSMITH_PROJECT: "chatbot"
+    
+  llm_models:
+    MAIN_LLM_MODEL: "gemma-3-27b-it"
+    EMBEDDINGS_MODEL: "gemini-embedding-001"
+    LLM_TRANSLATION_SUMMARIZATION_MODEL: "gemma-3-27b-it"
+    
 
 ingress:
   enabled: false
-  className: ""
-  annotations: {}
-    # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
+  className: "nginx"
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "PUT"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
   hosts:
-    - host: chart-example.local
+    - host: localstack.127.0.0.1.nip.io
+      paths:
+        - path: /localstack
+          pathType: ImplementationSpecific
+    - host: mlflow.127.0.0.1.nip.io
+      paths:
+        - path: /mlflow
+          pathType: ImplementationSpecific
+    - host: app.127.0.0.1.nip.io
       paths:
         - path: /
           pathType: ImplementationSpecific
   tls: []
-  #  - secretName: chart-example-tls
-  #    hosts:
-  #      - chart-example.local
+  # tls:
+  #   - secretName: example-tls
+  #     hosts:
+  #       - localstack.127.0.0.1.nip.io
+  #       - mlflow.127.0.0.1.nip.io
+  #       - app.127.0.0.1.nip.io
+
+# Gateway API Configuration (Kubernetes standard networking.gateway.k8s.io)
+gatewayAPI:
+  enabled: true
+  # GatewayClass name - should be created by NGINX Gateway Controller
+  gatewayClassName: "nginx"
+   # NGINX Gateway controller settings
+  controller:
+    env:
+      - name: CLIENT_MAX_BODY_SIZE
+        value: "0"
+  # Gateway configuration
+  gateway:
+    name: laredo-gateway
+    # Listeners define ports and protocols the gateway listens on
+    listeners:
+      - name: http
+        port: 80
+        protocol: HTTP
+  # HTTPRoute host configurations
+  hosts:
+    localstack:
+      enabled: true
+      host: localstack.127.0.0.1.nip.io
+      paths:
+        - path: /
+          pathPrefix: true
+      service: localstack-service
+      port: 4566
+    mlflow:
+      enabled: true
+      host: mlflow.127.0.0.1.nip.io
+      paths:
+        - path: /
+          pathPrefix: true
+      service: mlflow-service
+      port: 5000
+    frontend:
+      enabled: true
+      host: app.127.0.0.1.nip.io
+      paths:
+        - path: /
+          pathPrefix: true
+      service: laredo-frontend
+      port: 80
+  # NGINX-specific configuration for proxy settings and CORS
+  corsPolicy:
+    enabled: true
+    allowMethods:
+      - GET
+      - PUT
+      - POST
+      - DELETE
+      - OPTIONS
+    allowHeaders:
+      - "Content-Type"
+      - "Authorization"
+      - "x-amz-*"
+    allowOrigin: "*"
+    exposeHeaders:
+      - "ETag"
+      - "x-amz-version-id"
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious

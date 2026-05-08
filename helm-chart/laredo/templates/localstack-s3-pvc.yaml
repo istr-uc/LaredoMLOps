@@ -1,0 +1,13 @@
+{{- if .Values.backend.deploy_s3_storage }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: localstack-pvc-laredo
+  namespace: {{ .Values.frontend.namespace}}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.backend.s3_storage_size }}
+{{- end }}

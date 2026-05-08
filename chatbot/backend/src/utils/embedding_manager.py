@@ -32,6 +32,7 @@ class EmbeddingManager:
         local_documents: List[Document],
         web_documents: List[Document],
         persist_directory: str = "./database",
+        skip_reset: bool = False,
     ) -> None:
         """
         Initializes the EmbeddingManager, which manages embeddings for local and web
@@ -47,7 +48,7 @@ class EmbeddingManager:
         self.local_documents = local_documents
         self.web_documents = web_documents
         self.persist_directory = persist_directory
-
+        self.skip_reset = skip_reset
         self.database: Optional[Chroma] = None
         self.local_collection: Optional[Chroma] = None
         self.web_collection: Optional[Chroma] = None
@@ -60,15 +61,19 @@ class EmbeddingManager:
 
     def _initialize_database(self) -> None:
         """
-        Initializes the Chroma database and its collections. If the `reset_database`
-        flag is set to True, the database will be deleted and recreated.
+        Initializes the Chroma database and its collections. If the `skip_reset`
+        flag is False, the database will be deleted and recreated.
+        If `skip_reset` is True, it will load existing collections without resetting.
 
         This method also initializes the collections for local and web documents in parallel.
         """
         logger.info("Initializing database...")
 
         # Reset the database if required
-        self._reset_database()
+        if not self.skip_reset:
+            self._reset_database()
+        else:
+            logger.info("Skipping database reset as per configuration.")
 
         # Load the Chroma database
         self.database = Chroma(
@@ -76,7 +81,24 @@ class EmbeddingManager:
             persist_directory=self.persist_directory,
             **CHROMA_DB_CONFIG,
         )
-
+        
+        if self.skip_reset:
+            logger.info("Loading existing collections from disk without resetting.")
+            # Load existing collections by name from the persisted database
+            # Chroma will connect to existing collections if they exist on disk
+            self.local_collection = Chroma(
+                collection_name=self.local_collection_name,
+                embedding_function=self.embedding_model,
+                persist_directory=self.persist_directory,
+            )
+            self.web_collection = Chroma(
+                collection_name=self.web_collection_name,
+                embedding_function=self.embedding_model,
+                persist_directory=self.persist_directory,
+            )
+            logger.info("Existing collections loaded successfully.")
+            return
+            
         # Initialize collections in parallel using ThreadPoolExecutor
         with ThreadPoolExecutor() as executor:
             futures = [

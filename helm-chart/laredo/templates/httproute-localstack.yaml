@@ -1,0 +1,39 @@
+{{- if and (include "laredo.gatewayAPIEnabled" .) .Values.backend.deploy_s3_storage .Values.gatewayAPI.hosts.localstack.enabled }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: laredo-localstack-route
+  namespace: {{ .Values.backend.namespace }}
+  labels:
+    {{- include "laredo.labels" . | nindent 4 }}
+spec:
+  parentRefs:
+  - name: {{ .Values.gatewayAPI.gateway.name }}
+    sectionName: http
+  hostnames:
+  - {{ .Values.gatewayAPI.hosts.localstack.host }}
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /
+    backendRefs:
+    - name: {{ .Values.gatewayAPI.hosts.localstack.service }}
+      port: {{ .Values.gatewayAPI.hosts.localstack.port }}
+    {{- if .Values.gatewayAPI.corsPolicy.enabled }}
+    filters:
+    - type: RequestHeaderModifier
+      requestHeaderModifier:
+        add:
+        - name: Access-Control-Allow-Origin
+          value: {{ .Values.gatewayAPI.corsPolicy.allowOrigin | quote }}
+        - name: Access-Control-Allow-Methods
+          value: {{ join ", " .Values.gatewayAPI.corsPolicy.allowMethods | quote }}
+        - name: Access-Control-Allow-Headers
+          value: {{ join ", " .Values.gatewayAPI.corsPolicy.allowHeaders | quote }}
+        {{- if .Values.gatewayAPI.corsPolicy.exposeHeaders }}
+        - name: Access-Control-Expose-Headers
+          value: {{ join ", " .Values.gatewayAPI.corsPolicy.exposeHeaders | quote }}
+        {{- end }}
+    {{- end }}
+{{- end }}

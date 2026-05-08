@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ollama
+  namespace: laredo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ollama
+  template:
+    metadata:
+      labels:
+        app: ollama
+    spec:
+      containers:
+        - name: ollama
+          image: ghcr.io/istr-uc/LaredoMLOps-ollama:{{ .Values.chatbotBackend.image.tag }}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 11434
+          # volumeMounts:
+          #   - name: ollama-data
+          #     mountPath: /root/.ollama
+          resources:
+            requests:
+              cpu: "2"
+              memory: "2Gi"
+      # initContainers:
+      #   - name: model-loader
+      #     image: ollama/ollama:latest
+      #     command: ["sh", "-c", "ollama pull nomic-embed-text"]
+      #     volumeMounts:
+      #       - name: ollama-data
+      #         mountPath: /root/.ollama
+
+      # volumes:
+      #   - name: ollama-data
+      #     emptyDir: {}

@@ -10,7 +10,7 @@ from typing import Optional
 
 from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
 
-from src.config.config_init import LLM_CONFIG, EMBEDDINGS_CONFIG, LLM_FLASH_CONFIG
+from src.config.config_init import LLM_CONFIG, EMBEDDINGS_CONFIG, LLM_FLASH_CONFIG, MAIN_LLM_CONFIG, LLM_TRANSLATION_SUMMARIZATION_CONFIG
 from src.utils.logger_manager import logger
 
 
@@ -25,16 +25,16 @@ class ModelManager:
         """
         logger.info("Initializing ModelManager...")
         self._llm: Optional[ChatGoogleGenerativeAI] = None
-        self._flash_llm: Optional[ChatGoogleGenerativeAI] = None
+        self._translation_summarization_llm: Optional[ChatGoogleGenerativeAI] = None
         self._embeddings: Optional[GoogleGenerativeAIEmbeddings] = None
 
         with concurrent.futures.ThreadPoolExecutor() as executor:
-            future_llm = executor.submit(self._initialize_llm, LLM_CONFIG)
-            future_flash_llm = executor.submit(self._initialize_llm, LLM_FLASH_CONFIG)
+            future_llm = executor.submit(self._initialize_llm, MAIN_LLM_CONFIG)
+            future_flash_llm = executor.submit(self._initialize_llm, LLM_TRANSLATION_SUMMARIZATION_CONFIG)
             future_embeddings = executor.submit(self._initialize_embeddings)
 
             self._llm = future_llm.result()
-            self._flash_llm = future_flash_llm.result()
+            self._translation_summarization_llm = future_flash_llm.result()
             self._embeddings = future_embeddings.result()
 
         logger.info("ModelManager initialized successfully.")
@@ -80,16 +80,16 @@ class ModelManager:
         return self._llm
 
     @property
-    def flash_llm(self) -> Optional[ChatGoogleGenerativeAI]:
+    def translation_summarization_llm(self) -> Optional[ChatGoogleGenerativeAI]:
         """
         Getter for the Flash LLM model (used for translation and summarization).
 
         Returns:
             Optional[ChatGoogleGenerativeAI]: Instance of the Flash LLM model if initialized.
         """
-        if self._flash_llm is None:
+        if self._translation_summarization_llm is None:
             logger.warning("Attempted to access uninitialized Flash LLM model.")
-        return self._flash_llm
+        return self._translation_summarization_llm
 
     @property
     def embeddings(self) -> Optional[GoogleGenerativeAIEmbeddings]:

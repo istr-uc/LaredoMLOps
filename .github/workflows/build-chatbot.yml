@@ -1,0 +1,60 @@
+name: Build and push Docker images for chatbot
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'chatbot/**'
+env:
+  REGISTRY: ghcr.io
+jobs:
+  build-and-push-images:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Read version
+        id: version
+        run: echo "VERSION=$(cat chatbot/VERSION)" >> $GITHUB_OUTPUT
+
+      - name: Extract metadata (tags, labels) for Chatbot
+        id: meta-chatbot
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.REGISTRY }}/istr-uc/LaredoMLOps-chatbot:${{ steps.version.outputs.VERSION }}
+
+      - name: Extract metadata (tags, labels) for Ollama
+        id: meta-ollama
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.REGISTRY }}/istr-uc/LaredoMLOps-ollama:${{ steps.version.outputs.VERSION }}
+
+      - name: Build and push Chatbot image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: chatbot/backend/Dockerfile
+          push: true
+          tags: ${{ steps.meta-chatbot.outputs.tags }}
+          labels: ${{ steps.meta-chatbot.outputs.labels }}
+
+      - name: Build and push Ollama service image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: chatbot/backend/Dockerfile.ollama
+          push: true
+          tags: ${{ steps.meta-ollama.outputs.tags }}
+          labels: ${{ steps.meta-ollama.outputs.labels }}

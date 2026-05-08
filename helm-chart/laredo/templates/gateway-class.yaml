@@ -1,0 +1,1 @@
+{{- /* GatewayClass should be created by the NGINX Gateway controller, not by this chart. This file is kept as reference. */ -}}

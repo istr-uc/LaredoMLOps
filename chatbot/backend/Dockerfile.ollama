@@ -1,0 +1,9 @@
+FROM ollama/ollama:latest
+
+# Start Ollama, pull the model, then stop
+RUN ollama serve & \
+    sleep 5 && \
+    ollama pull nomic-embed-text:v1.5
+
+# Default command (run Ollama server)
+CMD ["serve"]

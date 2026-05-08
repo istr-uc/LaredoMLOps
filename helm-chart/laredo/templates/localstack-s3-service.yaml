@@ -1,0 +1,15 @@
+{{- if .Values.backend.deploy_s3_storage }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: localstack-service
+  namespace: {{ .Values.frontend.namespace}}
+spec:
+  type: ClusterIP
+  ports:
+    - port: {{ .Values.backend.s3_service_port }}
+      targetPort: {{ .Values.backend.s3_service_port }}
+      name: gateway
+  selector:
+    app: localstack
+{{- end }}

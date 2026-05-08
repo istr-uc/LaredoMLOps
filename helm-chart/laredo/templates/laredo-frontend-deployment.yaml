@@ -25,3 +25,18 @@ spec:
           value: {{ .Values.backend.service.name }}.{{ .Values.backend.namespace }}.svc.cluster.local:{{ .Values.backend.service.port }}
         - name: CHATBOT_HOST
           value: {{ .Values.chatbotBackend.service.name }}.{{ .Values.chatbotBackend.namespace }}.svc.cluster.local:{{ .Values.chatbotBackend.service.port }}
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: laredo-backend-secret
+              key: AWS_ACCESS_KEY_ID
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: laredo-backend-secret
+              key: AWS_SECRET_ACCESS_KEY
+        - name: AWS_DEFAULT_REGION
+          valueFrom:
+            secretKeyRef:
+              name: laredo-backend-secret
+              key: AWS_DEFAULT_REGION

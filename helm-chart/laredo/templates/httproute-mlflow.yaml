@@ -1,0 +1,23 @@
+{{- if and (include "laredo.gatewayAPIEnabled" .) .Values.backend.deploy_mlflow .Values.gatewayAPI.hosts.mlflow.enabled }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: laredo-mlflow-route
+  namespace: {{ .Values.backend.namespace }}
+  labels:
+    {{- include "laredo.labels" . | nindent 4 }}
+spec:
+  parentRefs:
+  - name: {{ .Values.gatewayAPI.gateway.name }}
+    sectionName: http
+  hostnames:
+  - {{ .Values.gatewayAPI.hosts.mlflow.host }}
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /
+    backendRefs:
+    - name: {{ .Values.gatewayAPI.hosts.mlflow.service }}
+      port: {{ .Values.gatewayAPI.hosts.mlflow.port }}
+{{- end }}

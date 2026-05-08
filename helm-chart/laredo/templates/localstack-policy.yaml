@@ -1,0 +1,12 @@
+apiVersion: gateway.nginx.org/v1alpha1
+kind: ClientSettingsPolicy
+metadata:
+  name: allow-large-uploads
+  namespace: {{ .Values.backend.namespace }}
+spec:
+  targetRef:
+    group: gateway.networking.k8s.io
+    kind: HTTPRoute
+    name: laredo-localstack-route
+  body:
+    maxSize: "0" # 0 means unlimited

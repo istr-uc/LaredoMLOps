@@ -1,0 +1,14 @@
+{{- if .Values.backend.deploy_postgres }}
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: {{ .Values.frontend.namespace}}
+  name: postgres
+spec:
+  clusterIP: None  # This makes the service headless (useful for StatefulSet)
+  ports:
+  - port: {{ .Values.backend.postgres_service_port }}
+    name: postgres
+  selector:
+    app: postgres
+{{- end }}

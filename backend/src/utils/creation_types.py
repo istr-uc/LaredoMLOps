@@ -1,3 +1,8 @@
+from fileinput import filename
+from io import StringIO
+import os
+
+import boto3
 from src.utils.utils import *
 from src.utils.preprocessing_strategy import *
 from src.utils.model_strategies import *
@@ -5,7 +10,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 from sklearn.pipeline import Pipeline
-from sklearn.base import estimator_html_repr
+from sklearn.base import estimator_html_repr, clone
 from sklearn.metrics import f1_score, mean_squared_error, recall_score, silhouette_score, r2_score, accuracy_score
 from sklearn.model_selection import train_test_split
 from autogluon.tabular import TabularDataset, TabularPredictor
@@ -14,7 +19,8 @@ import mlflow
 class ModelCreation():
     required_parameters = []
 
-    def __init__(self, **kwargs):
+    def __init__(self, run_id, **kwargs):
+        self.run_id = run_id
         self.validate(kwargs)
         self.set_params_as_attributes(kwargs)
 
@@ -28,6 +34,25 @@ class ModelCreation():
         for param in kwargs.keys():
             setattr(self, param, kwargs[param])
 
+    def get_dataset_from_s3(self, presigned_url):
+        # This code is for local testing, 
+        # for production we will use the presigned url directly to get the dataset
+        # without using boto3
+        # s3_client = boto3.client(service_name="s3",
+        #                         endpoint_url=os.getenv("S3_ENDPOINT_URL"),
+        #                         aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
+        #                         aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
+        #                         region_name=os.getenv("AWS_DEFAULT_REGION")) 
+        # bucket_name = "ml-datasets"
+        # object_key = dataset_filename
+
+        # response = s3_client.get_object(Bucket=bucket_name, Key=object_key)
+        
+        # file_content = response["Body"].read()
+        # return file_content
+        
+        # Get the dataset content from the presigned url
+        return pd.read_csv(presigned_url)#.to_csv(index=False).encode('utf-8')
     def create(self):
         pass
 
@@ -57,17 +82,22 @@ class ModelCreation():
 
 class ModelBasicCreation(ModelCreation):
     required_params = [
-        'modelName', 'problemType', 'datasetJSON', 'columnsDataType',
+        'modelName', 'problemType', 'datasetURL', 'columnsDataType',
         'target', 'preset', 'evalMetric', 'timeLimit'
     ]
 
     def create(self):
-
-        dataset = pd.DataFrame.from_dict(self.datasetJSON)
+        # Load dataset from s3 object store
+        # dataset_content = self.get_dataset_from_s3(self.datasetFilename)
+        # dataset = pd.read_csv(StringIO(dataset_content.decode('utf-8')))
+        dataset = self.get_dataset_from_s3(self.datasetURL)
+        # Old code to read dataset from http query body, keep for reference
+        # dataset = pd.DataFrame.from_dict(self.datasetJSON)
         dataset = dataset.astype(self.columnsDataType)
 
         
         x = dataset.drop(columns=[self.target])
+        column_names = x.columns.tolist()
         y = dataset[self.target]
 
         x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2) 
@@ -76,12 +106,16 @@ class ModelBasicCreation(ModelCreation):
             label=self.target,
             problem_type=self.problemType,
             eval_metric=self.evalMetric,
+            path=os.environ.get("AUTOGLUON_MODEL_DIR", "autogluon_models")
         )
 
-        with mlflow.start_run():
+        with mlflow.start_run(run_id=self.run_id):
 
             x_train_mlflow = mlflow.data.from_pandas(x_train)
             x_test_mlflow = mlflow.data.from_pandas(x_test)
+
+            # x_train_mlflow = mlflow.data.from_pandas(pd.DataFrame(x_train, columns=column_names))
+            # x_test_mlflow = mlflow.data.from_pandas(pd.DataFrame(x_test, columns=column_names))
 
             mlflow.log_input(x_train_mlflow, context="train")
             mlflow.log_input(x_test_mlflow, context="test")
@@ -134,26 +168,68 @@ class ModelBasicCreation(ModelCreation):
 
 class ModelAdvancedCreation(ModelCreation):
     required_params = [
-        'modelName', 'problemType', 'datasetJSON', 'columnsDataType',
-        'target', 'strategy', 'algorithm'
+        'modelName', 'problemType', 'datasetURL', 'columnsDataType',
+        'target', 'strategy', 'algorithm', 'implementation'
     ]
+    dimensionality_reduction_methods = ['pca', 'selectkbest']
 
+    # def __input_size_and_num_classes(self, x, y, dim_reduction_method=None, dim_reduction_params={},is_time_series=False, time_series_seq_length=1, cols_to_drop=[]):
+    #     # input_size = x.shape[1] - len(cols_to_drop)
+    #     # if dim_reduction_method is not None:
+    #     #     # Compute the input size after dimensionality reduction
+    #     #     if dim_reduction_method == 'pca':
+    #     #         input_size = dim_reduction_params.get('n_components')
+    #     #     elif dim_reduction_method == 'selectkbest':
+    #     #         input_size = dim_reduction_params.get('k')
+    #     # if is_time_series:
+    #     #     # For time series data, the input size is features * seq_length
+    #     #     input_size = input_size * time_series_seq_length
+    #     if self.problemType == 'classifier':
+    #         num_classes = len(y.unique())
+    #         return input_size, num_classes
+    #     return input_size, None
+    
+    def __num_classes(self, y):
+        num_classes = None
+        if self.problemType == 'classifier':
+            num_classes = len(y.unique())
+        return  num_classes
+    
     def create(self):
 
         preprocessing_methods = self.preprocessingMethods
         parameters_value = self.parametersValue
-
-        dataset = pd.DataFrame.from_dict(self.datasetJSON)
+        # Load dataset from s3 object store
+        # dataset_content = self.get_dataset_from_s3(self.datasetURL)
+        dataset = self.get_dataset_from_s3(self.datasetURL)
+        # dataset = pd.read_csv(pd.compat.StringIO(dataset_content.decode('utf-8')))
+        # dataset = pd.read_csv(StringIO(dataset_content.decode('utf-8')))
+        # Old code to read dataset from http query body, keep for reference
+        # dataset = pd.DataFrame.from_dict(self.datasetJSON)
         dataset = dataset.astype(self.columnsDataType)
-
+        is_time_series = False
         if dataset[self.target].dtype == "object":
             label_encoder = LabelEncoder()
             dataset[self.target] = label_encoder.fit_transform(dataset[self.target])
 
 
         steps = []
-
+        cols_to_drop = []
+        dimensionality_reduction_method = None
+        dimensionality_reduction_params = None
         for method, method_data in preprocessing_methods.items():
+            # Check for dimensionality reduction methods to handle input size calculation later
+            if method in self.dimensionality_reduction_methods:
+                dimensionality_reduction_method = method
+                dimensionality_reduction_params = method_data.get('params', {})
+            # Check for time series methods for later processing of sliding window
+            if method == 'time_series_sliding_window':
+                is_time_series = True
+                time_series_method_data = method_data
+                time_series_method = method
+                continue
+            if method == 'drop':
+                cols_to_drop = method_data.get('params', {}).get('columns', [])
             strategy_name = preprocessing_methods[method]['strategy']
             strategy_class = globals().get(strategy_name) 
             if strategy_class != None:
@@ -165,27 +241,76 @@ class ModelAdvancedCreation(ModelCreation):
             else:
                 raise ValidationError(message=f"Invalid strategy {strategy_name}", status_code=409)
             
+    
+        # TODO: Window transformation for time series data (it should always be the last step before the model)
+        # Check if the user has specified sliding window transformation for time series data
+        if is_time_series:
+            time_series_group_column = time_series_method_data['params'].get('timeSeriesGroupColumn')
+            time_series_time_column = time_series_method_data['params'].get('timeSeriesTimeColumn', None) # Optional
+            seq_length = time_series_method_data['params'].get('seq_length', 1)
+            # Order the data group column and time column so that the sliding window is applied correctly
+            dataset = dataset.sort_values(by=[time_series_group_column, time_series_time_column])
+            # Create transformer for sliding window
+            strategy_name = preprocessing_methods[time_series_method]['strategy']
+            strategy_class = globals().get(strategy_name) 
+            if strategy_class != None:
+                if 'params' in time_series_method_data:
+                    step = strategy_class().get_step(time_series_method_data['params'])
+            # Add the transformer to the pipeline steps
+                steps.append(step)
+        # Split the data into training and testing sets
+        
         x = dataset.drop(columns=[self.target])
+        column_names = x.columns.tolist()
         y = dataset[self.target]
-
-        x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2)
+        x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, shuffle= (not is_time_series))
 
         strategy_class = globals().get(self.strategy)
         if strategy_class is None:
             raise ValidationError(message="Invalid strategy", status_code=409)
         
-        with mlflow.start_run():
+        with mlflow.start_run(run_id=self.run_id):
 
             x_train_mlflow = mlflow.data.from_pandas(x_train)
             x_test_mlflow = mlflow.data.from_pandas(x_test)
+            # x_train_log = pd.DataFrame(x_train, columns=column_names, dtype=object)
+            # x_train_log[self.target] = y_train
+
+            # x_train_mlflow = mlflow.data.from_pandas(x_train_log.astype(self.columnsDataType),targets=self.target)
+            # x_test_log = pd.DataFrame(x_test, columns=column_names, dtype=object)
+            # x_test_log[self.target] = y_test
+            # x_test_mlflow = mlflow.data.from_pandas(x_test_log.astype(self.columnsDataType),targets=self.target)
 
             mlflow.log_input(x_train_mlflow, context="train")
             mlflow.log_input(x_test_mlflow, context="test")
-
+            
+            # For pytorch models, we might need to provide input size and num of classes
+            if self.implementation == 'pytorch':
+                # Add and fit a pipeline with a sample to determine input size after preprocessing steps
+                # Clone the steps to avoid modifying the original steps list
+                preprocession_pipeline = clone(Pipeline(steps))
+                sample = preprocession_pipeline.fit_transform(x_train.iloc[0:2], y_train.iloc[0:2])
+                # input_size, num_classes = self.__input_size_and_num_classes(
+                #     x_train,
+                #     y_train,
+                #     dim_reduction_method=dimensionality_reduction_method,
+                #     dim_reduction_params=dimensionality_reduction_params,
+                #     is_time_series=is_time_series,
+                #     time_series_seq_length= (seq_length if is_time_series else 1),
+                #     cols_to_drop=cols_to_drop
+                # )
+                input_size = sample.shape[1]
+                num_classes = self.__num_classes(y_train)
+                parameters_value['input_size'] = input_size
+                if num_classes is not None:
+                    parameters_value['output_size'] = num_classes
+                if is_time_series:
+                    parameters_value['seq_length'] = seq_length
+                # Convert x_train and x_test to float32 for pytorch models
 
             model = strategy_class().create_model(parameters_value)
 
-            
+            print(parameters_value)
             steps.append(("model", model))
             pipeline = Pipeline(steps)   
 
@@ -197,6 +322,7 @@ class ModelAdvancedCreation(ModelCreation):
             metrics = self.get_metrics(self.problemType, x_test, y_test, predictions)
             mlflow.log_metrics(metrics)
             mlflow.sklearn.log_model(sk_model=model, artifact_path="model", registered_model_name=self.modelName)
-            mlflow.log_text(estimator_html_repr(pipeline), "estimator.html")
+            printable_pipeline = get_printable_pytorch_pipeline(pipeline) if (self.implementation == 'pytorch') else pipeline
+            mlflow.log_text(estimator_html_repr(printable_pipeline), "estimator.html")
             
         return metrics
