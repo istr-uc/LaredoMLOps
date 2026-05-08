@@ -33,13 +33,13 @@ jobs:
         id: meta-chatbot
         uses: docker/metadata-action@v4
         with:
-          images: ${{ env.REGISTRY }}/istr-uc/LaredoMLOps-chatbot:${{ steps.version.outputs.VERSION }}
+          images: ${{ env.REGISTRY }}/istr-uc/laredomlops-chatbot:${{ steps.version.outputs.VERSION }}
 
       - name: Extract metadata (tags, labels) for Ollama
         id: meta-ollama
         uses: docker/metadata-action@v4
         with:
-          images: ${{ env.REGISTRY }}/istr-uc/LaredoMLOps-ollama:${{ steps.version.outputs.VERSION }}
+          images: ${{ env.REGISTRY }}/istr-uc/laredomlops-ollama:${{ steps.version.outputs.VERSION }}
 
       - name: Build and push Chatbot image
         uses: docker/build-push-action@v4
@@ -47,7 +47,7 @@ jobs:
           context: .
           file: chatbot/backend/Dockerfile
           push: true
-          tags: ${{ steps.meta-chatbot.outputs.tags }}
+          tags: ${{ env.REGISTRY }}/istr-uc/laredomlops-chatbot:${{ steps.version.outputs.VERSION }}
           labels: ${{ steps.meta-chatbot.outputs.labels }}
 
       - name: Build and push Ollama service image
@@ -56,5 +56,5 @@ jobs:
           context: .
           file: chatbot/backend/Dockerfile.ollama
           push: true
-          tags: ${{ steps.meta-ollama.outputs.tags }}
+          tags: ${{ env.REGISTRY }}/istr-uc/laredomlops-ollama:${{ steps.version.outputs.VERSION }}
           labels: ${{ steps.meta-ollama.outputs.labels }}

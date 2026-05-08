@@ -33,24 +33,24 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: ${{ env.REGISTRY }}/istr-uc/LaredoMLOps-backend:${{ steps.version.outputs.VERSION }}
+          images: ${{ env.REGISTRY }}/istr-uc/laredomlops-backend:${{ steps.version.outputs.VERSION }}
       - name: Build and push Docker image # For backend API image
         uses: docker/build-push-action@v4
         with:
           context: ./backend
           push: true
-          tags: ${{ env.REGISTRY }}/istr-uc/LaredoMLOps-backend:${{ steps.version.outputs.VERSION }}
+          tags: ${{ env.REGISTRY }}/istr-uc/laredomlops-backend:${{ steps.version.outputs.VERSION }}
           labels: ${{ steps.meta.outputs.labels }}
       
       - name: Extract metadata (tags, labels) for Docker # For backend trainer image
         id: meta_trainer
         uses: docker/metadata-action@v4
         with:
-          images: ${{ env.REGISTRY }}/istr-uc/LaredoMLOps-trainer:${{ steps.version.outputs.VERSION }}
+          images: ${{ env.REGISTRY }}/istr-uc/laredomlops-trainer:${{ steps.version.outputs.VERSION }}
       - name: Build and push Docker image # For backend trainer image
         uses: docker/build-push-action@v4
         with:
           context: ./backend
           push: true
-          tags: ${{ env.REGISTRY }}/istr-uc/LaredoMLOps-trainer:${{ steps.version.outputs.VERSION }}
+          tags: ${{ env.REGISTRY }}/istr-uc/laredomlops-trainer:${{ steps.version.outputs.VERSION }}
           labels: ${{ steps.meta_trainer.outputs.labels }}

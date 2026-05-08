@@ -33,11 +33,11 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: ${{ env.REGISTRY }}/istr-uc/LaredoMLOps-frontend:${{ steps.version.outputs.VERSION }}
+          images: ${{ env.REGISTRY }}/istr-uc/laredomlops-frontend:${{ steps.version.outputs.VERSION }}
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
         with:
           context: ./frontend
           push: true
-          tags: ${{ env.REGISTRY }}/istr-uc/LaredoMLOps-frontend:${{ steps.version.outputs.VERSION }}
+          tags: ${{ env.REGISTRY }}/istr-uc/laredomlops-frontend:${{ steps.version.outputs.VERSION }}
           labels: ${{ steps.meta.outputs.labels }}

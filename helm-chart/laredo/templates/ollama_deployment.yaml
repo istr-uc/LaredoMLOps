@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: ollama
-          image: ghcr.io/istr-uc/LaredoMLOps-ollama:{{ .Values.chatbotBackend.image.tag }}
+          image: ghcr.io/istr-uc/laredomlops-ollama:{{ .Values.chatbotBackend.image.tag }}
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 11434

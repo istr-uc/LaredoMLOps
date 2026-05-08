@@ -31,4 +31,4 @@ jobs:
       - name: Package and push Helm chart
         run: |
           helm package ./helm-chart/laredo
-          helm push LaredoMLOps-*.tgz oci://ghcr.io/istr-uc/
+          helm push laredomlops-*.tgz oci://ghcr.io/istr-uc/
