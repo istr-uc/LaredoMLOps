@@ -21,6 +21,11 @@ class SimpleImputerParams(BaseModel):
 class FfillParams(BaseModel):
     pass
 
+class OrdinalEncoderParams(BaseModel):
+    columns: list[str]
+    handle_unknown: Optional[str] = 'use_encoded_value'
+    unknown_value: Optional[float] = -1.0
+
 class TabularToWindowStrategyParams(BaseModel):
     sequence_length: Optional[int] = 5
     time_column: Optional[str] = 'timestamp'

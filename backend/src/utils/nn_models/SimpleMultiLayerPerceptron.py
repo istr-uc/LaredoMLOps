@@ -17,9 +17,6 @@ class SimpleMultiLayerPerceptronClassifier(torch.nn.Module):
             layers.append(activation_fn())
             in_size = hidden_size
 
-        # If it is binary classification, use a single output with sigmoid
-        if output_size == 2:
-            output_size = 1    
         layers.append(torch.nn.Linear(in_size, output_size))
         if output_size == 1:
             # Binary classification

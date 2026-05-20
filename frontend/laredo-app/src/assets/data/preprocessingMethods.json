@@ -16,9 +16,15 @@
         },
         "url": "https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.MinMaxScaler.html"
       },
-      "target_encoder": {
-        "strategy": "TargetEncoderStrategy",
-        "url": "https://contrib.scikit-learn.org/category_encoders/targetencoder.html"
+      "ordinal_encoder": {
+        "strategy": "OrdinalEncoderStrategy",
+        "params": {
+          "columns": {
+            "type": "column-list",
+            "description": "List of column names to apply ordinal encoding to"
+          }
+        },
+        "url": "https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.OrdinalEncoder.html"
       },
       "normalizer": {
         "strategy": "NormalizerStrategy",
@@ -30,6 +36,12 @@
       },
       "one_hot_encoder": {
         "strategy": "OneHotEncoderStrategy",
+        "params": {
+          "columns": {
+            "type": "column-list",
+            "description": "List of column names to apply one-hot encoding to"
+          }
+        },
         "url": "https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.OneHotEncoder.html"
       }
     }
@@ -95,7 +107,7 @@
             "description": "Name of the column to group data by when creating sequences to avoid mixing different entities"
           }
         },
-        "url": "https://scikit-learn.org/stable/modules/generated/sklearn.impute.SimpleImputer.html"
+        "url": ""
       }
     }
   }

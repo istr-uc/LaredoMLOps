@@ -74,8 +74,8 @@ function DatasetPreprocessing({columns, dropColumns, setDropColumns, selectedMet
 
         Object.entries(selectedParams).forEach(([paramName, value]) => {
             const param = methodParams[paramName]
-            // If the parameter type is 'column', set its enum to the list of columns
-            if (param.type === 'column') {
+            // If the parameter type is 'column' or 'column-list', set its enum to the list of columns
+            if (param.type === 'column' || param.type === 'column-list') {
                 param.enum = usableColumns
             }
             const { isValidParameter, parsedValue } = validateAndParseParam(paramName, value, param.type, param.enum)
@@ -204,6 +204,30 @@ function DatasetPreprocessing({columns, dropColumns, setDropColumns, selectedMet
                                 <option key={option} value={option}>{option}</option>
                             ))}
                         </select>
+                        : // If the parameter type is 'column-list', render a list of checkboxes
+                        preprocessingMethods[selectedCategory].methods[selectedMethod].params[paramName].type === 'column-list' ?
+                        <div className='max-h-40 overflow-y-auto border border-white rounded-md p-2'>
+                            {usableColumns.map((option) => (
+                                <div key={option} className='flex items-center mb-2'>
+                                    <input
+                                        type='checkbox'
+                                        id={`${paramName}-${option}`}
+                                        className='mr-2'
+                                        checked={Array.isArray(selectedParams[paramName]) && selectedParams[paramName].includes(option)}
+                                        onChange={(e) => {
+                                            const currentValues = Array.isArray(selectedParams[paramName]) ? selectedParams[paramName] : [];
+                                            const newValue = e.target.checked
+                                                ? [...currentValues, option]
+                                                : currentValues.filter(v => v !== option);
+                                            handleChange(paramName, newValue);
+                                        }}
+                                    />
+                                    <label htmlFor={`${paramName}-${option}`} className='text-xl'>
+                                        {option}
+                                    </label>
+                                </div>
+                            ))}
+                        </div>
                         : // Otherwise, render a text input
                         <input
                             type='text'

@@ -35,6 +35,13 @@ export function validateAndParseParam(parameterName, value, types, enumValues) {
                     }
                 }
                 break
+            case "column-list":
+                if (Array.isArray(value)) {
+                    if (enumValues && Array.isArray(enumValues) && value.every(v => enumValues.includes(v))) {
+                        isValidParameter = true
+                    }
+                }
+                break
             case "boolean":
                 if (value === "true" || value === "false" || value === true || value === false) {
                     parsedValue = value === "true" || value === true

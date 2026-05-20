@@ -73,7 +73,7 @@ class KNeighborsRegressorSklearnStrategy(ModelStrategy):
         params = KNeighborsRegressorParams(**parameters)
         return KNeighborsRegressor(**params.model_dump())
 
-class SimpleNeuralNetworkReggressorTorchStrategy(ModelStrategy):
+class SimpleNeuralNetworkRegressorTorchStrategy(ModelStrategy):
     def create_model(self, parameters):
         # Validate and parse parameters using Pydantic
         params = MultiLayerPerceptronRegressorParams(**parameters)

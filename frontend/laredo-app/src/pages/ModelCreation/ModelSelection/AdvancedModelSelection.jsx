@@ -128,7 +128,7 @@ function AdvancedModelSelection({algorithm, setAlgorithm, parametersValue, setPa
                                                         <input 
                                                             className='border border-white rounded-sm bg-transparent text-white px-1'
                                                             type="text" 
-                                                            value={parametersValue[parameterName] ?? defaultValue ?? ''}
+                                                            value={parametersValue[parameterName] === null ? 'None' : (parametersValue[parameterName] ?? defaultValue ?? '')}
                                                             onChange={(event) => handleParameterChange(parameterName, event)}
                                                         />
                                                         <div className='flex flex-col items-center group relative'>

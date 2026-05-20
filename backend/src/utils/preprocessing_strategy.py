@@ -1,7 +1,7 @@
 from sklearn.compose import ColumnTransformer
 from src.utils.preprocessing_transfomer import *
 from sklearn.decomposition import PCA
-from sklearn.preprocessing import MinMaxScaler, Normalizer, StandardScaler, OneHotEncoder
+from sklearn.preprocessing import MinMaxScaler, Normalizer, StandardScaler, OneHotEncoder, OrdinalEncoder
 from sklearn.feature_selection import SelectKBest
 from sklearn.impute import SimpleImputer
 from src.utils.preprocessing_data_classes import *
@@ -25,9 +25,23 @@ class MinMaxScalerStrategy(PreprocessingStrategy):
         scaler = MinMaxScaler(feature_range=(params['min'], params['max']))
         return ("MinMaxScaler", scaler)
     
-class TargetEncoderStrategy(PreprocessingStrategy):
+# class TargetEncoderStrategy(PreprocessingStrategy):
+#     def get_step(self, params):
+#         return
+
+class OrdinalEncoderStrategy(PreprocessingStrategy):
     def get_step(self, params):
-        return
+        params = OrdinalEncoderParams(**params).model_dump()
+        columns = params.pop('columns')
+        encoder = OrdinalEncoder(
+            handle_unknown='use_encoded_value',
+            unknown_value=-1.0,
+        )
+        preprocessor = ColumnTransformer(
+            remainder='passthrough',
+            transformers=[('ordinal_encoder', encoder, columns)]
+        )
+        return ("OrdinalEncoder", preprocessor)
     
 class NormalizerStrategy(PreprocessingStrategy):
     def get_step(self, params):
