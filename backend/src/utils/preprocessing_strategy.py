@@ -15,6 +15,7 @@ class DropStrategy(PreprocessingStrategy):
         params = DropParams(**params).model_dump()
         preprocessor = ColumnTransformer(
             remainder='passthrough',
+            verbose_feature_names_out=False,
             transformers=[('drop_col','drop',params['dropColumns'])]
         )
         return ("Preprocessor", preprocessor)
@@ -35,10 +36,11 @@ class OrdinalEncoderStrategy(PreprocessingStrategy):
         columns = params.pop('columns')
         encoder = OrdinalEncoder(
             handle_unknown='use_encoded_value',
-            unknown_value=-1.0,
+            unknown_value=-1,
         )
         preprocessor = ColumnTransformer(
             remainder='passthrough',
+            verbose_feature_names_out=False,
             transformers=[('ordinal_encoder', encoder, columns)]
         )
         return ("OrdinalEncoder", preprocessor)

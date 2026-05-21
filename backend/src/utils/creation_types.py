@@ -16,6 +16,12 @@ from sklearn.model_selection import train_test_split
 from autogluon.tabular import TabularDataset, TabularPredictor
 import mlflow
 
+class ValidationError(Exception):
+    def __init__(self, message, status_code):
+        super().__init__(message)
+        self.status_code = status_code
+        self.message = message
+
 class ModelCreation():
     required_parameters = []
 
@@ -154,7 +160,7 @@ class ModelBasicCreation(ModelCreation):
         elif problem_type == "cluster":
             silhouette_score_value = silhouette_score(x_test, predictions)
             metrics['silhouette_score'] = silhouette_score_value
-        elif problem_type == "regressor":
+        elif problem_type == "regression":
             mse = mean_squared_error(y_test, predictions)
             rmse = np.sqrt(mse)
             r2 = r2_score(y_test, predictions)
@@ -235,6 +241,7 @@ class ModelAdvancedCreation(ModelCreation):
             if strategy_class != None:
                 if 'params' in method_data:
                     step = strategy_class().get_step(method_data['params'])
+                    print(f"Adding preprocessing step: {method} with params: {method_data['params']}") # Debugging line
                 else:
                     step = strategy_class().get_step({})            
                 steps.append(step)
@@ -289,7 +296,10 @@ class ModelAdvancedCreation(ModelCreation):
                 # Add and fit a pipeline with a sample to determine input size after preprocessing steps
                 # Clone the steps to avoid modifying the original steps list
                 preprocession_pipeline = clone(Pipeline(steps))
-                sample = preprocession_pipeline.fit_transform(x_train.iloc[0:2], y_train.iloc[0:2])
+                preprocession_pipeline.set_output(transform="pandas")
+                # sample = preprocession_pipeline.fit_transform(x_train.iloc[0:2], y_train.iloc[0:2])
+                print(x_train.columns.tolist())
+                sample = preprocession_pipeline.fit_transform(x_train.head(2), y_train.head(2))
                 # input_size, num_classes = self.__input_size_and_num_classes(
                 #     x_train,
                 #     y_train,
@@ -299,6 +309,7 @@ class ModelAdvancedCreation(ModelCreation):
                 #     time_series_seq_length= (seq_length if is_time_series else 1),
                 #     cols_to_drop=cols_to_drop
                 # )
+                print(f"Sample after preprocessing steps: {sample}") # Debugging line
                 input_size = sample.shape[1]
                 num_classes = self.__num_classes(y_train)
                 parameters_value['input_size'] = input_size
@@ -306,14 +317,16 @@ class ModelAdvancedCreation(ModelCreation):
                     parameters_value['output_size'] = num_classes
                 if is_time_series:
                     parameters_value['seq_length'] = seq_length
-                # Convert x_train and x_test to float32 for pytorch models
+                # add last step to the pipeline to convert pandas to numpy for pytorch models
+                steps.append(("to_numpy", FunctionTransformer(lambda x: x.to_numpy(), validate=False)))
+                
 
             model = strategy_class().create_model(parameters_value)
 
             print(parameters_value)
             steps.append(("model", model))
             pipeline = Pipeline(steps)   
-
+            pipeline.set_output(transform="pandas")
             pipeline.fit(x_train, y_train)
             predictions = pipeline.predict(x_test)
 
