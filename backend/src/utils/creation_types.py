@@ -127,7 +127,7 @@ class ModelBasicCreation(ModelCreation):
             mlflow.log_input(x_test_mlflow, context="test")
             
             model = predictor.fit(
-                train_data=TabularDataset(x.join(y)),
+                train_data=TabularDataset(x_train.join(y_train)),
                 presets=self.preset,
                 time_limit=self.timeLimit
             )

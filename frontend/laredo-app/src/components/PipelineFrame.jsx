@@ -60,21 +60,17 @@ const centeredHtml = styleInjection + pipelineHtml;
   return (
     <div
       style={{
-        display: "flex",           // enable flex layout
-        justifyContent: "center",  // horizontal centering
-        alignItems: "flex-start",  // vertical alignment at top
         width: "100%",
         padding: "20px 0",
       }}
     >
       <div
         style={{
-          width: "auto",
           maxWidth: `${maxWidth}px`, // limit max width
           maxHeight: `${maxHeight}px`,
           overflow: "auto",
-          //border: "1px solid #ccc",
           borderRadius: "8px",
+          margin: "0 auto", // centers the div horizontally
         }}
       >
         <iframe
