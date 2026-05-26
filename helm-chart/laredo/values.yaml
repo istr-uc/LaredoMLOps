@@ -8,7 +8,7 @@ backend:
     repository: ghcr.io/istr-uc/laredomlops-backend
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: 1.0.0
+    tag: 1.0.1
 
   imagePullSecrets: []
   nameOverride: ""
@@ -70,7 +70,7 @@ backend:
   AWS_DEFAULT_REGION: "us-east-1"
   DATASET_BUCKET_NAME: "ml-datasets"
   TRAINER_IMAGE: "ghcr.io/istr-uc/laredomlops-trainer-cpu"
-  TRAINER_TAG: "1.0.0"
+  TRAINER_TAG: "1.0.1"
 
 frontend:
   replicaCount: 1
@@ -79,7 +79,7 @@ frontend:
     repository: ghcr.io/istr-uc/laredomlops-frontend
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: 1.0.0
+    tag: 1.0.1
 
   imagePullSecrets: []
   nameOverride: ""
