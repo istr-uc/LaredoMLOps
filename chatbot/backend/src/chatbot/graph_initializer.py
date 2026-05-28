@@ -241,35 +241,35 @@ class GraphInitializer:
 
         # Append the context and question to the system message
         system_messages.append(
-            # SystemMessage(
-            #     content=ANSWER_PROMPT.format(
-            #         context=combined_context, question=question, language=language
-            #     )
-            # )
-            HumanMessage(
+            SystemMessage(
                 content=ANSWER_PROMPT.format(
                     context=combined_context, question=question, language=language
                 )
             )
+            # HumanMessage(
+            #     content=ANSWER_PROMPT.format(
+            #         context=combined_context, question=question, language=language
+            #     )
+            # )
         )
 
         # If a summary exists, append it to the system message
         if summary:
-            # system_messages.append(
-            #     SystemMessage(content=SUMMARY_PROMPT.format(summary=summary))
-            # )
             system_messages.append(
-                HumanMessage(content=SUMMARY_PROMPT.format(summary=summary))
+                SystemMessage(content=SUMMARY_PROMPT.format(summary=summary))
             )
+            # system_messages.append(
+            #     HumanMessage(content=SUMMARY_PROMPT.format(summary=summary))
+            # )
 
         # Append recent messages to the system message
         if messages:
-            # system_messages.append(
-            #     SystemMessage(content=RECENT_MESSAGES_PROMPT.format(messages=messages))
-            # )
             system_messages.append(
-                HumanMessage(content=RECENT_MESSAGES_PROMPT.format(messages=messages))
+                SystemMessage(content=RECENT_MESSAGES_PROMPT.format(messages=messages))
             )
+            # system_messages.append(
+            #     HumanMessage(content=RECENT_MESSAGES_PROMPT.format(messages=messages))
+            # )
 
         # Add the user question to the message history
         question_message = HumanMessage(content=question)

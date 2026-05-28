@@ -72,7 +72,7 @@ class RandomForestRegressorParams(BaseModel):
     min_samples_split: Optional[int] = 2
     min_samples_leaf: Optional[int] = 1
     min_weight_fraction_leaf: Optional[float] = 0.0
-    max_features: Optional[str] = 'sqrt'
+    max_features: Optional[str] | Optional[float] | Optional[int] = 'sqrt'
     max_leaf_nodes: Optional[int] = None
     min_impurity_decrease: Optional[float] = 0.0
     ccp_alpha: Optional[float] = 0.0
@@ -81,7 +81,7 @@ class RandomForestRegressorParams(BaseModel):
     verbose: Optional[int] = 0
     warm_start: Optional[bool] = False
     max_samples: Optional[int] = None
-    obb_score: Optional[bool] = False
+    oob_score: Optional[bool] = False
 
 class DecisionTreeRegressorParams(BaseModel):
     criterion: Optional[str] = 'squared_error'
