@@ -47,7 +47,34 @@ function DatasetPreprocessing({columns, dropColumns, setDropColumns, selectedMet
         });
     }
 
+    const getOrderWarning = (selectedCategory) => {
+        const currentOrder = preprocessingMethods[selectedCategory].order
+        
+        // Obtener el orden máximo de los métodos ya seleccionados
+        let maxSelectedOrder = 0
+        Object.entries(selectedMethods).forEach(([methodName]) => {
+            // Encontrar a qué categoría pertenece este método
+            for (const [categoryName, categoryData] of Object.entries(preprocessingMethods)) {
+                if (categoryData.methods[methodName]) {
+                    maxSelectedOrder = Math.max(maxSelectedOrder, categoryData.order)
+                    break
+                }
+            }
+        })
+        
+        // Si el orden actual es menor que el máximo seleccionado, es una violación
+        if (currentOrder < maxSelectedOrder) {
+            const violatedCategory = Object.entries(preprocessingMethods).find(([_, data]) => data.order === maxSelectedOrder)
+            return { categoryName: violatedCategory[0], order: maxSelectedOrder }
+        }
+        return null
+    }
+
     const handleCellClick = (category, method, params) => {
+        const warning = getOrderWarning(category)
+        if (warning) {
+            alert(`⚠️ Warning: Adding "${category.replace(/_/g, ' ')}" (Step ${preprocessingMethods[category].order}) after "${warning.categoryName.replace(/_/g, ' ')}" (Step ${warning.order}) violates the recommended order.`)
+        }
         if (params != null && Object.keys(params).length > 0) {
             openModal()
             setSelectedCategory(category)
@@ -119,11 +146,18 @@ function DatasetPreprocessing({columns, dropColumns, setDropColumns, selectedMet
                     <strong className='mt-5'>Click on the techniques you want to use and specify the parameters to construct your pipeline.</strong>
                     <div className='grid grid-cols-2 w-3/4'>
                         <table className='border border-white mt-5 w-fit mx-auto'>
-                        {Object.entries(preprocessingMethods).map(([category]) => (
+                        {Object.entries(preprocessingMethods)
+                            .sort(([,a], [,b]) => a.order - b.order)
+                            .map(([category]) => (
                             <React.Fragment key={category}>
                                 <tbody>
                                     <tr>
-                                        <td className='bg-gray-800 text-white font-bold px-5 py-1' colSpan='2'>{category.replace(/_/g, ' ')}</td>
+                                        <td className='bg-gray-800 text-white font-bold pl-3'>
+                                            <span className='inline-flex items-center justify-center text-white rounded-full font-bold'>{preprocessingMethods[category].order}</span>
+                                        </td>
+                                        <td className='bg-gray-800 text-white font-bold p-1'>
+                                            {category.replace(/_/g, ' ')}
+                                        </td>
                                     </tr>
                                     {Object.entries(preprocessingMethods[category].methods).map(([method, methodData]) => (
                                         <tr key={method} className='bg-gray-800 hover:bg-transparent cursor-pointer'>
@@ -186,6 +220,7 @@ function DatasetPreprocessing({columns, dropColumns, setDropColumns, selectedMet
 
             <CustomModal isOpen={showModal} onClose={closeModal}>
                 <h2 className='text-5xl text-white font-semibold'>{selectedMethod} Parameters</h2>
+                <p className='text-sm text-gray-400 mt-2'>Step {selectedCategory && preprocessingMethods[selectedCategory].order} - {selectedCategory && selectedCategory.replace(/_/g, ' ')}</p>
                 {Object.entries(selectedParams).map(([paramName]) => (
                     <div className='flex flex-col mt-4' key={paramName}>
                         <label htmlFor={paramName} className='text-2xl mb-1'>

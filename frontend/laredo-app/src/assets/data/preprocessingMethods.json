@@ -1,5 +1,24 @@
 {
+  "Fill_Empty_Rows": {
+    "order": 1,
+    "multiple_selection": true,
+    "methods": {
+      "SimpleImputer": {
+        "strategy": "SimpleImputerStrategy",
+        "url": "https://scikit-learn.org/stable/modules/generated/sklearn.impute.SimpleImputer.html"
+      },
+      "Ffill": {
+        "strategy": "FfillStrategy",
+        "url": "https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.ffill.html"
+      },
+      "Bfill": {
+        "strategy": "BfillStrategy",
+        "url": "https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.bfill.html"
+      }
+    }
+  },
   "Scale_and_Encode_Features": {
+    "order": 2,
     "multiple_selection": true,
     "methods": {
       "minmax_scaler": {
@@ -47,6 +66,7 @@
     }
   },
   "Reduce_Columns": {
+    "order": 3,
     "multiple_selection": false,
     "methods": {
       "selectkbest": {
@@ -71,24 +91,8 @@
       }
     }
   },
-  "Fill_Empty_Rows": {
-    "multiple_selection": true,
-    "methods": {
-      "SimpleImputer": {
-        "strategy": "SimpleImputerStrategy",
-        "url": "https://scikit-learn.org/stable/modules/generated/sklearn.impute.SimpleImputer.html"
-      },
-      "Ffill": {
-        "strategy": "FfillStrategy",
-        "url": "https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.ffill.html"
-      },
-      "Bfill": {
-        "strategy": "BfillStrategy",
-        "url": "https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.bfill.html"
-      }
-    }
-  },
   "Convert_To_Sequence": {
+    "order": 4,
     "multiple_selection": true,
     "methods": {
       "TabularDataToSequence": {
