@@ -182,13 +182,14 @@ function ModelDetails() {
                         </div>
                     </div>
                 </div>
-                
+                <div className='flex flex-row mt-5 mb-5'>
                 {isDeployed ? (
-                    <CustomButton className='text-5xl my-20' onClick={undeployModel}>Undeploy</CustomButton>
+                    <CustomButton className='mx-2 text-lg mt-5 w-fit' onClick={undeployModel}>Undeploy</CustomButton>
                 ) : (
-                    <CustomButton className='text-5xl my-20' onClick={deployModel}>Deploy</CustomButton>
+                    <CustomButton className='mx-2 text-lg mt-5 w-fit' onClick={deployModel}>Deploy</CustomButton>
                 )}
-
+                <CustomButton className='mx-2 text-lg mt-5 w-fit' onClick={goModels}>Back</CustomButton>
+                </div>
             </div>
 
             <CustomModal isOpen={showModal} onClose={closeModal}>

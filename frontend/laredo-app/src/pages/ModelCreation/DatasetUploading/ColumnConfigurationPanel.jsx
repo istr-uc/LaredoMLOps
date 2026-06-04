@@ -25,6 +25,24 @@ function ColumnConfigurationPanel({preview, columns, columnsDataType, setColumns
     }
     const [errors, setErrors] = useState({})
     const [targetError, setTargetError] = useState(null)
+    const [exampleValues, setExampleValues] = useState({})
+
+    // Extraer valores de ejemplo de la primera fila del dataset
+    useEffect(() => {
+        if (preview) {
+            try {
+                const data = typeof preview === 'string' ? JSON.parse(preview) : preview
+                if (Array.isArray(data) && data.length > 0) {
+                    setExampleValues(data[0])
+                } else if (typeof data === 'object' && data !== null) {
+                    setExampleValues(data)
+                }
+            } catch (error) {
+                console.error('Error parsing preview data:', error)
+                setExampleValues({})
+            }
+        }
+    }, [preview])
 
     const handleDataTypeChange = (column, event) => {
         setColumnsDataType(prevState => ({
@@ -74,6 +92,7 @@ function ColumnConfigurationPanel({preview, columns, columnsDataType, setColumns
                             <tr>
                                 <th className='text-white px-14 py-5'>Column name</th>
                                 <th className='text-white px-9 py-5'>Data type</th>
+                                <th className='text-white px-9 py-5'>Example value</th>
                                 <th className='text-white px-9 py-5'>
                                     {targetError && (<p className='text-red-500'>{targetError}</p>)}
                                     Target
@@ -101,6 +120,9 @@ function ColumnConfigurationPanel({preview, columns, columnsDataType, setColumns
                                         {errors[column] && (
                                             <p className='text-red-500'>{errors[column]}</p>
                                         )}
+                                    </td>
+                                    <td className='px-9 py-5'>
+                                        <span className='text-gray-400'>{String(exampleValues[column] ?? '-')}</span>
                                     </td>
                                     <td>
                                         <input

@@ -71,7 +71,7 @@ function BasicModelSelection({problemTypeEvalMetrics, evalMetric, setEvalMetric,
                     {presetError && <p className="col-span-2 text-red-500 mt-2">{presetError}</p>}
 
 
-                    <label htmlFor="timeLimit" className="text-2xl text-white mt-8 mr-4">Time limit:</label>
+                    <label htmlFor="timeLimit" className="text-2xl text-white mt-8 mr-4">Time limit (s):</label>
                     <input 
                         id="timeLimit"
                         className='border border-white rounded-sm bg-gray-800 text-lg text-white p-1 h-9 mt-8 w-full'

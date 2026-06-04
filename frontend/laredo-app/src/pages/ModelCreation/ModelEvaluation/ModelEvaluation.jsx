@@ -2,12 +2,15 @@ import React from "react"
 import { useNavigate } from 'react-router-dom'
 import CustomButton from '@components/CustomButton'
 
-function ModelEvaluation({metrics}) {
+function ModelEvaluation({metrics, modelName}) {
 
+    
     const navigate = useNavigate()
-
     const goHome = () => {
         navigate('/')
+    }
+    const goModelDetails = () => {
+        navigate(`/models/${modelName}`)
     }
 
     return(
@@ -34,7 +37,11 @@ function ModelEvaluation({metrics}) {
                 <div className='flex flex-col justify-center items-end text-right mx-auto'>
                     <h1 className='text-6xl font-bold'>Evaluate your model</h1>
                     <strong className='mt-5'>Explore metrics of the generated model for informed analysis.</strong>
-                    <CustomButton className='text-lg mt-5 w-fit' onClick={goHome}>Finish</CustomButton>
+                    <div className='flex flex-row mt-5 mb-5'>
+                        <CustomButton className='mx-2 text-lg mt-5 w-fit' onClick={goHome}>Finish</CustomButton>
+                        <CustomButton className='mx-2 text-lg mt-5 w-fit' onClick={goModelDetails}>More Details</CustomButton>
+                    </div>
+                    
                 </div>
             </div>
         </>

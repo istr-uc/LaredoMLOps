@@ -202,7 +202,7 @@ function DatasetPreprocessing({columns, dropColumns, setDropColumns, selectedMet
                             </table>
                             <div className='flex flex-row mt-5 mb-5'>
                                 <CustomButton className='mr-3' onClick={onNextStep}>Choose your algorithm</CustomButton>
-                                <CustomButton onClick={handleOnCancel}>Cancel</CustomButton>
+                                <CustomButton onClick={handleOnCancel}>Back</CustomButton>
                             </div>
                         </div>
                     </div>

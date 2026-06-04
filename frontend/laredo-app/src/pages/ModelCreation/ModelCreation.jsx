@@ -429,7 +429,7 @@ function ModelCreation() {
                     ) : (
                         <>
                             {metrics ? (
-                                <ModelEvaluation metrics={metrics} />
+                                <ModelEvaluation metrics={metrics} modelName={modelName} />
                             ) : (
                                 <div className='flex flex-col items-center justify-center h-[66vh]'>
                                     <h1 className='text-5xl mt-7 text-red-500'>¡Oops! Something went wrong</h1>
