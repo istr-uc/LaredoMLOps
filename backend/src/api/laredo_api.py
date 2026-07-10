@@ -21,6 +21,7 @@ api = Api(app=app)
 
 ip = os.environ['TRACKING_URI_IP']
 port = os.environ['TRACKING_URI_PORT']
+hostname = os.environ['HOSTNAME']
 mlflow.set_tracking_uri(f"http://{ip}:{port}")
 # mlflow.set_tracking_uri(f"http://localhost:5000") # For local testing
 
@@ -29,7 +30,7 @@ config.load_incluster_config()
 configuration = client.Configuration.get_default_copy()
 api_client = client.ApiClient(configuration)
 batch_v1 = client.BatchV1Api(api_client)
-
+custom_obj_v1 = client.CustomObjectsApi(api_client)
 
 @app.route("/")
 def hello():
@@ -77,7 +78,8 @@ def get_model(model_name):
         "estimator": estimator,
         "metrics" : run.data.metrics,
         "dataset" : dataset,
-        "is_deployed" : is_deployed
+        "is_deployed" : is_deployed,
+        "deployment_url" : f"http://{model_name}.{hostname}/docs" if is_deployed else None
     }
     # print("response_data: ", response_data) # Debugging line
     return jsonify(response_data), 200
@@ -218,57 +220,98 @@ def render_template(template_name, data):
 
 @app.route("/models/<model_name>/deploy", methods=["POST"])
 def model_deploy(model_name):
-    # templateLoader = jinja2.FileSystemLoader(searchpath="./")
-    # templateLoader = jinja2.FileSystemLoader(searchpath="src/resources/")
-    # templateEnv = jinja2.Environment(loader=templateLoader)
-    # TEMPLATE_FILE = "languageWrapper_template.jinja"
-    # template = templateEnv.get_template(TEMPLATE_FILE)
-
-    data = {
+    model = mlflow.search_registered_models(filter_string=f"name='{model_name}'")
+    if not model:
+        return jsonify({"error": "Model not found"}), 404
+    model_uri = model[0].latest_versions[0].source if model else None    
+    isvc_data = {
         "deployment_name": model_name,
         "model_name": model_name,
-        "replicas": 1,
-        "tracking_uri_ip": ip,
-        "tracking_uri_port": port,
+        "model_uri": model_uri,
+        "mlflow_tracking_uri": f"http://{ip}:{port}",
+        # "tracking_uri_port": port,
+        "model_format": "sklearn",
         "is_k8s": True
     }
 
+    route_data = {
+        "model_name": model_name,
+        "hostname": hostname,
+    }
+    response_model = create_model_depoyment(isvc_data)
+    response_http_route = create_model_deployment_httproute(route_data)
+
+    if response_model['status_code'] == 201 and response_http_route['status_code'] == 201:
+        return jsonify({"message": "Model deployed successfully",
+                        "deployment_url": f"http://{model_name}.{hostname}/docs"}), 201
+    else:
+        delete_deployment(model_name)
+        return jsonify({"error": "Failed to deploy model"}), 500
+
+
+def create_model_depoyment(data):
+
     # outputText = template.render(data)
-    outputText = render_template("languageWrapper_template.jinja", data)
+    outputText = render_template("inference_service_template.jinja", data)
     dep = yaml.safe_load(outputText)
 
     # config.load_kube_config()
 
-    try:
-        config.load_kube_config()
-    except config.config_exception.ConfigException:
-        # `load_kube_config` assumes a local kube-config file, and fails if not
-        # present, raising:
-        #
-        #     kubernetes.config.config_exception.ConfigException: Invalid
-        #     kube-config file. No configuration found.
-        #
-        # Since running a parsl driver script on a kubernetes cluster is a common
-        # pattern to enable worker-interchange communication, this enables an
-        # in-cluster config to be loaded if a kube-config file isn't found.
-        #
-        # Based on: https://github.com/kubernetes-client/python/issues/1005
-        try:
-            config.load_incluster_config()
-        except config.config_exception.ConfigException:
-            return jsonify({"error": "Failed to load both kube-config file and in-cluster configuration."}), 500
+    # try:
+    #     config.load_kube_config()
+    # except config.config_exception.ConfigException:
+    #     # `load_kube_config` assumes a local kube-config file, and fails if not
+    #     # present, raising:
+    #     #
+    #     #     kubernetes.config.config_exception.ConfigException: Invalid
+    #     #     kube-config file. No configuration found.
+    #     #
+    #     # Since running a parsl driver script on a kubernetes cluster is a common
+    #     # pattern to enable worker-interchange communication, this enables an
+    #     # in-cluster config to be loaded if a kube-config file isn't found.
+    #     #
+    #     # Based on: https://github.com/kubernetes-client/python/issues/1005
+    #     try:
+    #         config.load_incluster_config()
+    #     except config.config_exception.ConfigException:
+    #         return jsonify({"error": "Failed to load both kube-config file and in-cluster configuration."}), 500
 
+    # Inicializar en el arranque del backend, no en cada request
+    # custom_obj_v1 = client.CustomObjectsApi()
 
-    v1 = client.CustomObjectsApi()
+    resp = custom_obj_v1.create_namespaced_custom_object(
+        group="serving.kserve.io",
+        version="v1beta1",
+        plural="inferenceservices",
+        body=dep,
+        namespace="laredo")
+    # return tuple with response and status code
+    return {'response':jsonify(resp), 'status_code': 201}
 
-    resp = v1.create_namespaced_custom_object(
-        group="machinelearning.seldon.io",
-        version="v1",
-        plural="seldondeployments",
+def create_model_deployment_httproute(route_data):
+    outputText = render_template("http_route_template.jinja", data=route_data)
+    dep = yaml.safe_load(outputText)
+
+    # try:
+    #     config.load_kube_config()
+    # except config.config_exception.ConfigException:
+    #     try:
+    #         config.load_incluster_config()
+    #     except config.config_exception.ConfigException:
+    #         return jsonify({"error": "Failed to load both kube-config file and in-cluster configuration."}), 500
+    
+    # Inicializar en el arranque del backend, no en cada request
+    #
+    custom_obj_v1 = client.CustomObjectsApi(api_client)
+
+    resp = custom_obj_v1.create_namespaced_custom_object(
+        group="gateway.networking.k8s.io",
+        version="v1beta1",
+        plural="httproutes",
         body=dep,
         namespace="laredo")
 
-    return jsonify(), 201
+    return {'response':jsonify(resp), 'status_code': 201}
 
 @app.route("/models/<model_name>/deploy", methods=["DELETE"])
 def delete_deployment(model_name):
@@ -288,13 +331,44 @@ def delete_deployment(model_name):
     v1 = client.CustomObjectsApi()
 
     resp = v1.delete_namespaced_custom_object(
-        group="machinelearning.seldon.io",
-        version="v1",
-        plural="seldondeployments",
-        name=f"laredo-server-{model_name}", 
+        group="gateway.networking.k8s.io",
+        version="v1beta1",
+        plural="httproutes",
+        name=f"{model_name}-route", 
+        namespace="laredo")
+    v1.delete_namespaced_custom_object(
+        group="serving.kserve.io",
+        version="v1beta1",
+        plural="inferenceservices",
+        name=f"{model_name}", 
         namespace="laredo")
 
-    return jsonify(), 204
+    return jsonify(resp), 204
+
+# def delete_deployment(model_name):
+#     '''
+#     Delete a deployment with the given model name
+#     Args:
+#         model_name: str
+#     '''
+#     try:
+#         config.load_kube_config()
+#     except config.config_exception.ConfigException:
+#         try:
+#             config.load_incluster_config()
+#         except config.config_exception.ConfigException:
+#             return jsonify({"error": "Failed to load both kube-config file and in-cluster configuration."}), 500
+
+#     v1 = client.CustomObjectsApi()
+
+#     resp = v1.delete_namespaced_custom_object(
+#         group="machinelearning.seldon.io",
+#         version="v1",
+#         plural="seldondeployments",
+#         name=f"laredo-server-{model_name}", 
+#         namespace="laredo")
+
+#     return jsonify(), 204
 
 
 def get_deployments():
@@ -303,31 +377,20 @@ def get_deployments():
     Returns:
         List of deployments
     '''
-    try:
-        config.load_kube_config()
-    except config.config_exception.ConfigException:
-        try:
-            config.load_incluster_config()
-        except config.config_exception.ConfigException:
-            raise config.config_exception.ConfigException(
-                "Failed to load both kube-config file and in-cluster configuration."
-            )
-
-    v1 = client.CustomObjectsApi()
 
     # If not found, raises catch the exception and return an empty list
     try:
-        deployments = v1.list_namespaced_custom_object(
-            group="machinelearning.seldon.io",
-            version="v1",
-            plural="seldondeployments",
+        isvcs = custom_obj_v1.list_namespaced_custom_object(
+            group="serving.kserve.io",
+            version="v1beta1",
+            plural="inferenceservices",
             namespace="laredo")
-        deployments = deployments["items"]
+        isvcs = isvcs["items"]
     except client.exceptions.ApiException as e:
-        deployments = []
+        isvcs = []
 
-    #print("deployments: ", len(deployments))
-    return deployments
+    #print("inferenceservices: ", len(isvcs))
+    return isvcs
 
 
 def search_deployment(model_name):
@@ -342,7 +405,7 @@ def search_deployment(model_name):
 
 
     for deployment in deployments:
-        if deployment["metadata"]["name"] == f"laredo-server-{model_name}":
+        if deployment["metadata"]["name"] == f"{model_name}":
             return True
 
 

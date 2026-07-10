@@ -1,0 +1,18 @@
+apiVersion: "serving.kserve.io/v1beta1"
+kind: "InferenceService"
+metadata:
+  name: {{ model_name }}
+spec:
+  predictor:
+    model:
+      args: ["--enable_docs_url=True"]
+      modelFormat:
+        name: {{ model_format }}
+      storageUri: {{ model_uri }}
+      resources:
+        requests:
+          cpu: "100m"
+          memory: "512Mi"
+        limits:
+          cpu: "1"
+          memory: "1Gi"

@@ -18,6 +18,7 @@ function ModelDetails() {
     const [showModal, setShowModal] = useState(false)
     const [isSuccess, setIsSuccess] = useState(false)
     const [isDeployed, setIsDeployed] = useState(false)
+    const [deploymentUrl, setDeploymentUrl] = useState('')
     //const apiIp = import.meta.env.VITE_API_IP
     //const apiPort = import.meta.env.VITE_API_PORT
 
@@ -48,6 +49,9 @@ function ModelDetails() {
             // setDataset(JSON.parse((response.data.dataset === '' || response.data.dataset === null) ? 'null': response.data.dataset))
             setDataset(dataset)
             setIsDeployed(response.data.is_deployed)
+            if (response.data.is_deployed) {
+                setDeploymentUrl(response.data.deployment_url)
+            }
         } catch (error) {
             console.error('Error fetching data:', error)
         }
@@ -75,6 +79,7 @@ function ModelDetails() {
             if (response.status == 201) {
                 setIsSuccess(true)
                 setIsDeployed(true)
+                setDeploymentUrl(response.data.deployment_url)
             } else {
                 setIsSuccess(false)
             }
@@ -93,6 +98,7 @@ function ModelDetails() {
             if (response.status == 204) {
                 setIsSuccess(true)
                 setIsDeployed(false)
+                setDeploymentUrl('')
             } else {
                 setIsSuccess(false)
             }
@@ -135,7 +141,15 @@ function ModelDetails() {
                 <iframe srcDoc={pipeline} className="w-full h-[700px] border rounded"  sandbox="allow-scripts"  title="ML Pipeline"/>
                 </div> */}
                 <PipelineIframe pipelineHtml={pipeline} maxHeight={800} />
-
+                {/* If the model is deployed, show the deployment URL */}
+                {deploymentUrl && (
+                    <div className='mt-12'>
+                        <h3 className='text-white text-xl font-bold mb-2'>Deployment URL</h3>
+                        <a href={deploymentUrl} target='_blank' rel='noopener noreferrer' className='text-blue-500 underline'>
+                            {deploymentUrl}
+                        </a>
+                    </div>
+                )}
                 <div className='flex items-center mt-12 w-full'>
                     <div className='flex flex-col items-center w-1/2'>
                         <h2 className='text-white text-3xl font-bold mb-2'>Metrics</h2>

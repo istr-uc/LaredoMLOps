@@ -1,0 +1,20 @@
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: HTTPRoute
+metadata:
+  name: {{ model_name }}-route
+spec:
+  parentRefs:
+  - group: gateway.networking.k8s.io
+    kind: Gateway
+    name: laredo-gateway
+    namespace: laredo
+  hostnames:
+  - "{{ model_name }}.{{ hostname }}" # Cambia esto al hostname que desees
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: / # La ruta estándar de KServe
+    backendRefs:
+    - name: {{ model_name }}-predictor # El nombre del SVC del paso 1
+      port: 80

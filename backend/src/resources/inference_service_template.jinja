@@ -1,0 +1,29 @@
+apiVersion: serving.kserve.io/v1beta1
+kind: InferenceService
+metadata:
+  name: {{ model_name }}
+spec:
+  predictor:
+    containers:
+      - name: kserve-container
+        env:
+          - name: MODEL_NAME
+            value: {{ model_name }}
+          - name: MLFLOW_TRACKING_URI
+            value: {{ mlflow_tracking_uri }}
+          - name: MODEL_URI
+            value: {{ model_uri }}
+        image: localhost:5000/laredo-model:0.0.3
+        imagePullPolicy: IfNotPresent
+        args:
+          - --workers=1
+          - --http_port=8080
+          - --model_name={{ model_name }}
+          - --enable_docs_url=true
+        resources:
+          limits:
+            cpu: 2
+            memory: 2Gi
+          requests:
+            cpu: 1
+            memory: 1Gi

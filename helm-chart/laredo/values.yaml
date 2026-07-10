@@ -209,6 +209,7 @@ gatewayAPI:
   gateway:
     name: laredo-gateway
     # Listeners define ports and protocols the gateway listens on
+    hostname: 127.0.0.1.nip.io
     listeners:
       - name: http
         port: 80
