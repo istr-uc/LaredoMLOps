@@ -39,6 +39,10 @@ spec:
           value: {{ .Values.backend.TRAINER_IMAGE}}
         - name: TRAINER_TAG
           value: {{ .Values.backend.TRAINER_TAG}}
+        - name: INFERENCE_SERVICE_IMAGE
+          value: {{ .Values.backend.INFERENCE_SERVICE_IMAGE}}
+        - name: INFERENCE_SERVICE_TAG
+          value: {{ .Values.backend.INFERENCE_SERVICE_TAG}}
         - name: HOSTNAME
           value: {{ quote .Values.gatewayAPI.gateway.hostname }}
         - name: AWS_ACCESS_KEY_ID

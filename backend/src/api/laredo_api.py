@@ -230,6 +230,7 @@ def model_deploy(model_name):
         "model_uri": model_uri,
         "mlflow_tracking_uri": f"http://{ip}:{port}",
         # "tracking_uri_port": port,
+        "inference_service_image": os.getenv("INFERENCE_SERVICE_IMAGE") + ":" + os.getenv("INFERENCE_SERVICE_TAG"),
         "model_format": "sklearn",
         "is_k8s": True
     }
