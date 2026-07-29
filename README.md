@@ -1,5 +1,14 @@
 # Laredo: Democratizing ML lifecicle management 
 
+## Documentation
+
+The documentation site is being centralized under [docs/](docs/) and will be published through GitHub Pages.
+
+- [Documentation home](docs/index.md)
+- [Installation guide](docs/installation.md)
+- [Usage guide](docs/usage.md)
+- [Configuration reference](docs/configuration.md)
+
 ## What is Laredo?
 
 Laredo is a software tool that simplifies the process of creating, versioning, deploying and monitoring scalable machine learning pipelines based on scikit-learn, autogluon, pytorch (soon) and keras (soon).
@@ -33,7 +42,7 @@ After a few seconds you can access the Laredo web UI using.
 > [!NOTE]
 > The first time executing the command or after an update it migth take longer because it need to download the containers from the registry.
 
-A more detailed description of the intallation process, including the installation of the prerequired components it available at [Instalation guide](tutotials/Installation_guide.md)
+A more detailed description of the intallation process, including the installation of the prerequired components it available at [Installation guide](docs/installation.md)
 
 ### Required values.yaml parameters
 

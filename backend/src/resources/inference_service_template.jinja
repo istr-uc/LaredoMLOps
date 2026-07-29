@@ -13,7 +13,7 @@ spec:
             value: {{ mlflow_tracking_uri }}
           - name: MODEL_URI
             value: {{ model_uri }}
-        image: localhost:5000/laredo-model:0.0.3
+        image: {{ inference_service_image }}
         imagePullPolicy: IfNotPresent
         args:
           - --workers=1
