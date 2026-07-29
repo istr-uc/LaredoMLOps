@@ -18,12 +18,12 @@ theme:
 nav:
   - Home: index.md
   - Install: installation.md
-  - Usage: usage.md
-  - Basic Creation: basic-creation-mode.md
-  - Advanced Creation: advanced-creation-mode.md
+  - Usage: 
+    - Quick Start: usage.md
+    - Basic Creation: basic-creation-mode.md
+    - Advanced Creation: advanced-creation-mode.md
   - Configuration: configuration.md
   - Local Deployment: local-deployment.md
-  - Multimedia: multimedia.md
 
 markdown_extensions:
   - admonition
@@ -36,6 +36,7 @@ markdown_extensions:
       alternate_style: true
   - toc:
       permalink: true
-
+plugins:
+  - mkdocs-video
 extra_css:
   - stylesheets/extra.css

@@ -2,6 +2,8 @@
 
 This guide shows a detailed example of creating a model with the advanced creation mode for a credit card fraud detection case study.
 
+![type:video](assets/video/LaredoMLOps.webm)
+
 ## Example case study: credit card fraud detection
 
 The example uses the Kaggle dataset "Credit card fraud detection dataset" to build a binary classification model that predicts whether a transaction is fraudulent.
