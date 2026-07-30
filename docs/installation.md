@@ -208,5 +208,4 @@ kubectl cluster-info
 ## Practical notes
 
 - If you are not yet clear on the configuration in `values.yaml`, review the [Configuration](configuration.md) page.
-- If you want to show the process with screenshots or a short video, use the [Multimedia](multimedia.md) page.
 - For a local test deployment, it can also be useful to review [Local deployment](local-deployment.md).

@@ -9,6 +9,5 @@ This site centralizes the operational documentation so it is easy to find the mo
 - [Installation](installation.md): steps to prepare the environment and deploy the project.
 - [Usage](usage.md): basic workflow for operating the tool.
 - [Configuration](configuration.md): reference for parameters in the `values.yaml` file.
-- [Multimedia](multimedia.md): guide for adding images, screenshots, and video.
 
 
