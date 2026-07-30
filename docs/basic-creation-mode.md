@@ -19,16 +19,50 @@ Use the basic mode when you want a guided workflow for a standard task such as p
 - Confirm the target variable and the detected data types.
 - Review the automatic suggestions and adjust them if needed.
 
-### 3. Use the default configuration
+=== "Upload"
+    
+    ![Dataset upload step](assets/images/common/02-Upload_dataset.png)
 
-- Keep the default preprocessing steps.
-- Choose a standard algorithm such as logistic regression or random forest.
-- Start the training process.
+=== "Preview"
+
+    ![Dataset preview](assets/images/common/03-Dataset_preview.png)
+
+=== "Data types"
+    
+    ![Detected data types](assets/images/common/04-Data_types.png)
+
+### 3. Choose the training parameters
+
+- Indicate the Preset (Expected quality and complexity of the model)
+- Choose the validation metric.
+- Set a time limit for the training process.
+
+![Training configuration](assets/images/basic/Basic_mode_configuration.png)
 
 ### 4. Review and deploy
 
 - Inspect the evaluation metrics and model summary.
 - Deploy the version that meets the expected quality threshold.
+
+=== "Evaluation"
+
+    ![Evaluation results](assets/images/basic/Evaluation_basic_mode.png)
+
+=== "Models"
+
+    ![Model list](assets/images/common/11_Model_list.png)
+
+=== "Details"
+
+    ![Model details](assets/images/basic/Model_details_basic.png)
+
+=== "Deploy"
+
+    ![Deploy the model](assets/images/advanced/14-Deploy_model.png)
+
+=== "Endpoints"
+
+    ![Swagger endpoint view](assets/images/common/15-Swagger.png)
 
 ## When to use this mode
 
