@@ -46,3 +46,8 @@ By University of Cantabria.
 @author Gabriel Gómez García
 @author Ricardo Dintén
 @supervisor Marta Zorrilla
+
+Intellectual property registration.
+
+Registration number: 16 / 2026 / 4851 
+Regsitration date: 26/06/2026
